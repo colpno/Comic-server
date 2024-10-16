@@ -1,4 +1,8 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+import { Document, Model, RootQuerySelector } from 'mongoose';
+
+import { PrimitiveType } from './common.type';
+import { ClientProvidedMongoDBOperators, MongoDBOperatorsMap } from './mongoOperators.type';
 
 /* 
 ======================================================================
@@ -74,3 +78,93 @@ export interface ErrorResponseContent {
 export type ResponseContent = SuccessfulResponseContent | ErrorResponseContent;
 
 export type Response = ExpressResponse<ResponseContent>;
+
+/* 
+======================================================================
+ 
+  Request types for API.
+ 
+======================================================================
+*/
+
+/**
+ * The allowed queries for the request.
+ * @example
+ * { field1: ['eq', 'gt'], field2: ['eq', 'gt'] }
+ */
+export type AllowedQueries = Record<string, (keyof MongoDBOperatorsMap)[]>;
+
+export type Embed<DataType = Record<string, unknown>> = {
+  /**
+   * The field which will be populated.
+   * @example
+   * 'field'
+   */
+  path: string;
+  /**
+   * Choose the fields to return or not. By define the field with or without the prefix minus sign "-".
+   * @example
+   * 'field1 field2 -field3'
+   */
+  select?: string;
+  /**
+   * The filter of the populated doc.
+   * @example
+   * { field1: 'value1', field2: { gt: 10 } }
+   */
+  match?: Partial<Record<keyof DataType, Partial<ClientProvidedMongoDBOperators>>>;
+  /**
+   * For deep population. Repeat the embed object.
+   */
+  populate?: GetRequestArgs<DataType>['_embed'];
+};
+
+export type SortOrder = 'asc' | 'desc';
+
+/**
+ * @example
+ * { field1: 'asc', field2: 'desc' }
+ */
+export type Sort<DataType = Record<string, unknown>> = Partial<Record<keyof DataType, SortOrder>>;
+
+/**
+ * The filter for the query.
+ * @example
+ * { field1: 'value1', field2: { gt: 10 } }
+ */
+export type Filter<DataType = Record<string, unknown>> = Partial<
+  Record<keyof DataType, PrimitiveType | Partial<ClientProvidedMongoDBOperators>>
+>;
+
+export type GetRequestArgs<
+  DataType = Record<string, unknown>,
+  MongooseModel = Model<Document>
+> = Filter<DataType> &
+  RootQuerySelector<MongooseModel> & {
+    /**
+     * Choose the fields to return or not. By define the field with or without the prefix minus sign "-".
+     * @example
+     * 'field1 field2 -field3'
+     */
+    _select?: string;
+    /**
+     * Embed the related collection in the result.
+     * @example
+     * 'field'
+     * @example
+     * { path: 'field' }
+     * @example
+     * [{ path: 'field' }]
+     */
+    _embed?: string | Embed<DataType> | Embed<DataType>[];
+    /**
+     * Sort column(s).
+     * @example
+     * { field1: 'asc', field2: 'desc' }
+     */
+    _sort?: Sort<DataType>;
+    /** Limit the number of items per page. */
+    _limit?: number;
+    /** For paginating. */
+    _page?: number;
+  };
