@@ -3,6 +3,10 @@
     "target": "es2016",
     "module": "commonjs",
     "outDir": "./dist",
+    "baseUrl": "./src",
+    "paths": {
+      "~/*": ["*"]
+    },
 
     /* Emit */
     "sourceMap": true,

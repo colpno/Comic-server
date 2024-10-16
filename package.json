@@ -3,8 +3,8 @@
   "main": "src/main.ts",
   "scripts": {
     "test": "cross-env NODE_ENV=test MONGODB_URI=mongodb://localhost:27017/n2wnw420vkw7 jest --testTimeout=5000",
-    "build": "npx tsc",
-    "start": "node dist/main.js",
+    "build": "npx tsc && tsc-alias",
+    "start": "node -r tsconfig-paths/register dist/main.js",
     "dev": "tsx watch --ignore 'src/tests/*' src/main.ts"
   },
   "dependencies": {
@@ -12,6 +12,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "mongoose": "^8.7.1",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.19.1"
   },
   "devDependencies": {
@@ -24,6 +25,7 @@
     "jest": "^29.7.0",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
+    "tsc-alias": "^1.8.10",
     "typescript": "^5.6.3"
   },
   "version": "1.0.0",
