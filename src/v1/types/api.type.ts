@@ -65,7 +65,7 @@ export interface ErrorResponseMetadata {
   environment: string;
 }
 
-export interface ErrorResponseContent {
+export interface FailedResponseContent {
   /** HTTP status code. */
   code: number;
   /** Indicate the request as error or not. */
@@ -75,7 +75,7 @@ export interface ErrorResponseContent {
   metadata?: ErrorResponseMetadata;
 }
 
-export type ResponseContent = SuccessfulResponseContent | ErrorResponseContent;
+export type ResponseContent = SuccessfulResponseContent | FailedResponseContent;
 
 export type Response = ExpressResponse<ResponseContent>;
 
@@ -137,10 +137,10 @@ export type Filter<DataType = Record<string, unknown>> = Partial<
 >;
 
 export type GetRequestArgs<
-  DataType = Record<string, unknown>,
-  MongooseModel = Model<Document>
-> = Filter<DataType> &
-  RootQuerySelector<MongooseModel> & {
+  DataType = undefined,
+  MongooseModel extends Model<Document> | undefined = undefined
+> = (DataType extends undefined ? {} : Filter<DataType>) &
+  (MongooseModel extends Model<Document> ? RootQuerySelector<MongooseModel> : {}) & {
     /**
      * Choose the fields to return or not. By define the field with or without the prefix minus sign "-".
      * @example
