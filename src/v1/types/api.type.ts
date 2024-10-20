@@ -39,7 +39,7 @@ export interface Pagination {
 }
 
 export interface SuccessfulResponseContent {
-  data: unknown[] | Record<string, unknown>;
+  data: unknown[] | unknown;
   metadata?: {
     pagination?: Pagination;
   };
@@ -70,7 +70,12 @@ export interface FailedResponseContent {
   code: number;
   /** Indicate the request as error or not. */
   error: boolean;
-  reason: string;
+  reason:
+    | string
+    | {
+        path: string;
+        message: string;
+      }[];
   /** Only available on a **non-production** environment. */
   metadata?: ErrorResponseMetadata;
 }

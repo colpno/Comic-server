@@ -18,7 +18,7 @@ type BuildMongoQueryValue =
   | ObjectId
   | ObjectId[];
 
-type BuildMongoQueryLogicalValue = ValueOf<Pick<ClientProvidedMongoDBOperators, '_and' | '_or'>>;
+type BuildMongoQueryLogicalValue = ValueOf<Pick<ClientProvidedMongoDBOperators, 'and' | 'or'>>;
 
 export default class ApiQuery {
   /** @inheritdoc AllowedQueries */
@@ -110,12 +110,12 @@ export default class ApiQuery {
         return { $in: value };
       case 'nin':
         return { $nin: value };
-      case '_or': {
+      case 'or': {
         const conditions = value as BuildMongoQueryLogicalValue;
 
         return {
           $or: conditions.map((condition) => {
-            type Queries = MongoDBLogicalOperatorsMap['_or']['$or'][0];
+            type Queries = MongoDBLogicalOperatorsMap['or']['$or'][0];
             const queries: Queries = {};
 
             for (const [field, operatorsOrString] of Object.entries(condition)) {
@@ -129,12 +129,12 @@ export default class ApiQuery {
           }),
         };
       }
-      case '_and': {
+      case 'and': {
         const conditions = value as BuildMongoQueryLogicalValue;
 
         return {
           $and: conditions.map((condition) => {
-            type Queries = MongoDBLogicalOperatorsMap['_and']['$and'][0];
+            type Queries = MongoDBLogicalOperatorsMap['and']['$and'][0];
             const queries: Queries = {};
 
             for (const [field, operatorsOrString] of Object.entries(condition)) {

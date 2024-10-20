@@ -1,4 +1,4 @@
-import { FilterQuery, Model, PipelineStage } from 'mongoose';
+import { FilterQuery, PipelineStage } from 'mongoose';
 
 import { AllowedQueries, Embed, GetRequestArgs } from '../types/api.type';
 import ApiQuery from './ApiQuery.util';
@@ -43,11 +43,15 @@ export default class Pipeline extends ApiQuery {
     _limit,
     _page,
     ..._filters
-  }: GetRequestArgs<DataType, Model<Document>>): PipelineStage[] {
+  }: GetRequestArgs<DataType>): PipelineStage[] {
     const pipeline: PipelineStage[] = [this.matchingPipeline(_filters)];
 
     if (_embed) {
-      pipeline.push(...this.embeddingPipeline<DataType>(_embed));
+      pipeline.push(
+        ...this.embeddingPipeline<DataType>(
+          _embed as Exclude<GetRequestArgs<DataType>['_embed'], undefined>
+        )
+      );
     }
 
     if (_sort) {
@@ -114,7 +118,9 @@ export default class Pipeline extends ApiQuery {
     return { $match: this.translateToMongoQuery(filter) };
   }
 
-  public embeddingPipeline<DataType>(_embed: GetRequestArgs<DataType>['_embed']): PipelineStage[] {
+  public embeddingPipeline<DataType>(
+    _embed: Exclude<GetRequestArgs<DataType>['_embed'], undefined>
+  ): PipelineStage[] {
     const handler = (embedment: typeof _embed, prefixLocalField = ''): PipelineStage[] => {
       const pipelines: PipelineStage[] = [];
 
@@ -171,7 +177,7 @@ export default class Pipeline extends ApiQuery {
 
         // For deep population
         if (embed.populate) {
-          pipelines.push(...handler(embed.populate, localField));
+          pipelines.push(...handler(embed.populate as typeof _embed, localField));
         }
       }
       return pipelines;

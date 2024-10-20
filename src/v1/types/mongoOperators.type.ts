@@ -32,7 +32,7 @@ export interface ClientProvidedMongoDBOperators {
   /** Has no value in. */
   nin: PrimitiveType[];
   /** This or that. */
-  _or: Record<
+  or: Record<
     string,
     Pick<
       ClientProvidedMongoDBOperators,
@@ -40,7 +40,7 @@ export interface ClientProvidedMongoDBOperators {
     >
   >[];
   /** This and that. */
-  _and: ClientProvidedMongoDBOperators['_or'];
+  and: ClientProvidedMongoDBOperators['or'];
 }
 
 export interface MongoDBUnLogicalOperatorsMap {
@@ -59,8 +59,8 @@ export interface MongoDBUnLogicalOperatorsMap {
 }
 
 export interface MongoDBLogicalOperatorsMap {
-  _or: { $or: Record<string, ValueOf<MongoDBUnLogicalOperatorsMap> | PrimitiveType>[] };
-  _and: { $and: Record<string, ValueOf<MongoDBUnLogicalOperatorsMap> | PrimitiveType>[] };
+  or: { $or: Record<string, ValueOf<MongoDBUnLogicalOperatorsMap> | PrimitiveType>[] };
+  and: { $and: Record<string, ValueOf<MongoDBUnLogicalOperatorsMap> | PrimitiveType>[] };
 }
 
 export type MongoDBOperatorsMap = MongoDBLogicalOperatorsMap & MongoDBUnLogicalOperatorsMap;
