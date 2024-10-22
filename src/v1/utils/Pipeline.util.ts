@@ -30,7 +30,11 @@ export default class Pipeline extends ApiQuery {
    */
   protected fieldTypeReferences: PipelineProps['fieldTypeReferences'];
 
-  constructor({ allowedQueries = {}, fieldTypeReferences = {}, fieldMap = {} }: PipelineProps) {
+  constructor({
+    allowedQueries = {},
+    fieldTypeReferences = {},
+    fieldMap = {},
+  }: PipelineProps = {}) {
     super(allowedQueries);
     this.fieldTypeReferences = fieldTypeReferences;
     this.fieldMap = fieldMap;
