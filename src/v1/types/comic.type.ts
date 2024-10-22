@@ -22,6 +22,7 @@ export interface Comic {
   chapterNumbersResetOnNewVolume: boolean;
   createdAt: string;
   updatedAt: string;
+  chapters: Chapter[];
   /** Chapter ID. */
   latestUploadedChapter?: Chapter['id'];
   coverImageUrl: string;
