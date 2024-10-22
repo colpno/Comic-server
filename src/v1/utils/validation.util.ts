@@ -1,8 +1,12 @@
-import { ValidationResult } from 'joi';
+import { Schema, ValidationResult } from 'joi';
 
 import { Joi } from '../configs/joi.conf';
 import { HTTP_400_BAD_REQUEST } from '../constants/httpCode.constant';
-import { FailedResponseContent, GetRequestArgs } from '../types/api.type';
+import { Embed, FailedResponseContent, GetRequestArgs } from '../types/api.type';
+import {
+  MongoDBLogicalOperatorsMap,
+  MongoDBUnLogicalOperatorsMap,
+} from '../types/mongoOperators.type';
 
 export const processValidationError = (error: Exclude<ValidationResult['error'], undefined>) => {
   const content: FailedResponseContent = {
@@ -16,7 +20,7 @@ export const processValidationError = (error: Exclude<ValidationResult['error'],
   return content;
 };
 
-export const normalOperatorsSchema = {
+export const normalOperatorsSchema: Record<keyof MongoDBUnLogicalOperatorsMap, Schema> = {
   like: Joi.string(),
   eq: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()),
   ne: Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean()),
@@ -40,7 +44,7 @@ export const normalOperatorsSchema = {
   nin: Joi.array().items(Joi.alternatives().try(Joi.string(), Joi.number())),
 };
 
-export const logicalOperatorsSchema = {
+export const logicalOperatorsSchema: Record<keyof MongoDBLogicalOperatorsMap, Schema> = {
   or: Joi.array().items(
     Joi.object().pattern(/.*/, Joi.alternatives().try(Joi.string(), normalOperatorsSchema))
   ),
@@ -52,19 +56,25 @@ export const logicalOperatorsSchema = {
 const clientProvidedMongoOperatorsSchema =
   Joi.object(normalOperatorsSchema).keys(logicalOperatorsSchema);
 
-const embedSchema = {
+const embedSchema = Joi.object<Record<keyof Embed, Schema>>({
   path: Joi.string().required(),
   select: Joi.string(),
   match: Joi.object().pattern(
     /.*/,
     Joi.alternatives().try(Joi.string(), clientProvidedMongoOperatorsSchema)
   ),
-  populate: Joi.link('...'),
-};
-export const validateGetRequest: Record<keyof GetRequestArgs, any> = {
+  populate: Joi.alternatives().try(
+    Joi.string(),
+    Joi.link('#embed'),
+    Joi.array().items(Joi.link('#embed'))
+  ),
+})
+  .id('embed')
+  .maxDepth(3);
+export const validateGetRequest: Record<keyof GetRequestArgs, Schema> = {
   _limit: Joi.number().integer().positive(),
   _page: Joi.number().integer().positive(),
   _sort: Joi.object().pattern(/.*/, Joi.string().valid('asc', 'desc')),
   _select: Joi.string(),
-  _embed: [Joi.string(), embedSchema, Joi.array().items(embedSchema)],
+  _embed: Joi.alternatives().try(Joi.string(), embedSchema, Joi.array().items(embedSchema)),
 };

@@ -65,17 +65,17 @@ export interface ErrorResponseMetadata {
   environment: string;
 }
 
+export interface ValidationError {
+  path: string;
+  message: string;
+}
+
 export interface FailedResponseContent {
   /** HTTP status code. */
   code: number;
   /** Indicate the request as error or not. */
   error: boolean;
-  reason:
-    | string
-    | {
-        path: string;
-        message: string;
-      }[];
+  reason: string | ValidationError[];
   /** Only available on a **non-production** environment. */
   metadata?: ErrorResponseMetadata;
 }
