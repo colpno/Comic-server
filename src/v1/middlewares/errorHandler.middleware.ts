@@ -3,7 +3,8 @@ import { NextFunction, Request, Response } from 'express';
 import { Error as MongooseError } from 'mongoose';
 
 import { FailedResponseContent } from '../types/api.type';
-import { GeneralError, generateErrorMetadata } from '../utils/error.utils';
+import { GeneralError } from '../utils/error.utils';
+import { generateErrorMetadata } from '../utils/meta.util';
 
 config();
 

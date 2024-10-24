@@ -1,7 +1,3 @@
-import { Request } from 'express';
-
-import { ErrorResponseMetadata } from '../types/api.type';
-
 interface GeneralErrorProps {
   message: string;
   code: number;
@@ -66,17 +62,3 @@ export class Error500 extends GeneralError {
     super({ message, code: 500 });
   }
 }
-
-export const generateErrorMetadata = (
-  req: Request,
-  overide?: Partial<ErrorResponseMetadata>
-): ErrorResponseMetadata => ({
-  requestId: req.headers['x-request-id'] as string,
-  timestamp: new Date().toISOString(),
-  endpoint: req.url,
-  httpMethod: req.method,
-  stackTrace: '',
-  errorName: '',
-  environment: process.env.NODE_ENV as string,
-  ...overide,
-});
