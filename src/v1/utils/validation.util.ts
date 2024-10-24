@@ -73,7 +73,7 @@ const embedSchema = Joi.object<Record<keyof Embed, Schema>>({
   .maxDepth(3);
 export const validateGetRequest: Record<keyof GetRequestArgs, Schema> = {
   _limit: Joi.number().integer().positive(),
-  _page: Joi.number().integer().positive(),
+  _page: Joi.number().integer().positive().greater(0),
   _sort: Joi.object().pattern(/.*/, Joi.string().valid('asc', 'desc')),
   _select: Joi.string(),
   _embed: Joi.alternatives().try(Joi.string(), embedSchema, Joi.array().items(embedSchema)),
