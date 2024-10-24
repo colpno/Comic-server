@@ -1,8 +1,10 @@
 import OriginalJoi from 'joi';
 import { escape } from 'lodash';
+import { isObjectIdOrHexString } from 'mongoose';
 
 interface ExtendedStringSchema extends OriginalJoi.StringSchema {
   escapeHTML(): this;
+  isMongoObjectId(): this;
 }
 
 interface ExtendedObjectSchema extends OriginalJoi.ObjectSchema {
@@ -34,6 +36,23 @@ const escapeHTML: OriginalJoi.Extension = {
   },
 };
 
+const isMongoObjectId: OriginalJoi.Extension = {
+  type: 'string',
+  base: OriginalJoi.string(),
+  messages: {
+    'string.isMongoObjectId': '{{#label}} must be a mongo object id',
+  },
+  rules: {
+    isMongoObjectId: {
+      validate(value, helpers) {
+        if (!isObjectIdOrHexString(value)) {
+          return helpers.error('string.isMongoObjectId');
+        }
+        return value;
+      },
+    },
+  },
+};
 const maxDepth: OriginalJoi.Extension = {
   type: 'object',
   base: OriginalJoi.object(),
@@ -74,4 +93,4 @@ const maxDepth: OriginalJoi.Extension = {
   },
 };
 
-export const Joi: ExtendedJoi = OriginalJoi.extend(escapeHTML, maxDepth);
+export const Joi: ExtendedJoi = OriginalJoi.extend(escapeHTML, isMongoObjectId, maxDepth);
