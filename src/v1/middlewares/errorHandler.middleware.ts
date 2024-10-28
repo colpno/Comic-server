@@ -2,7 +2,7 @@ import { config } from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import { Error as MongooseError } from 'mongoose';
 
-import { FailedResponseContent } from '../types/api.type';
+import { FailedResponse } from '../types/api.type';
 import { GeneralError } from '../utils/error.utils';
 import { generateErrorMetadata } from '../utils/meta.util';
 
@@ -12,7 +12,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
   if (error instanceof MongooseError) {
     const { message, name, stack } = error;
 
-    const data: FailedResponseContent = {
+    const data: FailedResponse = {
       code: 500,
       error: true,
       reason: message,
@@ -29,7 +29,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
   }
 
   if (typeof error === 'string') {
-    const data: FailedResponseContent = {
+    const data: FailedResponse = {
       code: 500,
       error: true,
       reason: error,
@@ -48,7 +48,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
   if (error instanceof GeneralError) {
     const { code, message: reason, error: isError, name, stack } = error;
 
-    const data: FailedResponseContent = {
+    const data: FailedResponse = {
       code,
       error: isError,
       reason,
@@ -67,7 +67,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
   if (error instanceof Error) {
     const { stack, message: reason, name } = error;
 
-    const data: FailedResponseContent = {
+    const data: FailedResponse = {
       code: 500,
       error: true,
       reason,
@@ -83,7 +83,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
     return;
   }
 
-  const data: FailedResponseContent = {
+  const data: FailedResponse = {
     code: 500,
     error: true,
     reason: 'Unknown error',

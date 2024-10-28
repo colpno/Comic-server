@@ -12,7 +12,7 @@ import { ClientProvidedMongoDBOperators, MongoDBOperatorsMap } from './mongoOper
 ======================================================================
 */
 
-export interface Pagination {
+export interface PaginationMeta {
   /** The current page. */
   currentPage: number;
   /** The links to navigate pages. */
@@ -22,13 +22,13 @@ export interface Pagination {
      * @example
      * /api/v1/users?page=3
      */
-    next: string;
+    next?: string;
     /**
      * The link to the previous page.
      * @example
      * /api/v1/users?page=1
      */
-    previous: string;
+    previous?: string;
   };
   /** The maximum items in 1 page. */
   perPage: number;
@@ -38,10 +38,10 @@ export interface Pagination {
   totalPages: number;
 }
 
-export interface SuccessfulResponseContent {
+export interface SuccessfulResponse {
   data: unknown[] | unknown;
   metadata?: {
-    pagination?: Pagination;
+    pagination?: PaginationMeta;
   };
 }
 
@@ -70,7 +70,7 @@ export interface ValidationError {
   message: string;
 }
 
-export interface FailedResponseContent {
+export interface FailedResponse {
   /** HTTP status code. */
   code: number;
   /** Indicate the request as error or not. */
@@ -80,7 +80,7 @@ export interface FailedResponseContent {
   metadata?: ErrorResponseMetadata;
 }
 
-export type ResponseContent = SuccessfulResponseContent | FailedResponseContent;
+export type ResponseContent = SuccessfulResponse | FailedResponse;
 
 export type Response = ExpressResponse<ResponseContent>;
 

@@ -1,15 +1,15 @@
 import { Schema, ValidationResult } from 'joi';
 
+import { HTTP_400_BAD_REQUEST } from '~/constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
-import { HTTP_400_BAD_REQUEST } from '../constants/httpCode.constant';
-import { Embed, FailedResponseContent, GetRequestArgs } from '../types/api.type';
+import { Embed, FailedResponse, GetRequestArgs } from '../types/api.type';
 import {
   MongoDBLogicalOperatorsMap,
   MongoDBUnLogicalOperatorsMap,
 } from '../types/mongoOperators.type';
 
 export const processValidationError = (error: Exclude<ValidationResult['error'], undefined>) => {
-  const content: FailedResponseContent = {
+  const content: FailedResponse = {
     reason: error.details.map((detail) => ({
       path: detail.path.join('.'),
       message: detail.message,
@@ -53,10 +53,10 @@ export const logicalOperatorsSchema: Record<keyof MongoDBLogicalOperatorsMap, Sc
   ),
 };
 
-const clientProvidedMongoOperatorsSchema =
+export const clientProvidedMongoOperatorsSchema =
   Joi.object(normalOperatorsSchema).keys(logicalOperatorsSchema);
 
-const embedSchema = Joi.object<Record<keyof Embed, Schema>>({
+export const embedSchema = Joi.object<Record<keyof Embed, Schema>>({
   path: Joi.string().required(),
   select: Joi.string(),
   match: Joi.object().pattern(
