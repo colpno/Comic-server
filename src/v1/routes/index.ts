@@ -1,13 +1,11 @@
 import { Router } from 'express';
 
-import mangadexRouter from './mangadex.route';
+import comicRouter from './comic.route';
 
 const router = Router();
 
-router.get('/health', (_, res) => {
-  res.status(200).json({ status: 'ok' });
-});
+router.get('/health', (_, res) => res.status(200).json({ status: 'ok' }));
 
-router.use('/mangadex', mangadexRouter);
+router.use('/comics', comicRouter);
 
 export default router;
