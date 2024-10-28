@@ -1,11 +1,12 @@
 import { Router } from 'express';
 
-import { getComicList } from '../controllers/comic.controller';
-import { validateGetComics } from '../validations/comic.validation';
+import { getComicById, getComicList } from '../controllers/comic.controller';
+import { validateGetComicById, validateGetComicList } from '../validations/comic.validation';
 
 const router = Router();
 
-router.get('/', validateGetComics, getComicList);
+router.get('/:id', validateGetComicById, getComicById);
+router.get('/', validateGetComicList, getComicList);
 
 const comicRouter = router;
 export default comicRouter;

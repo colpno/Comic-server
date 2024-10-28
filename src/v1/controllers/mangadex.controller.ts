@@ -2,7 +2,11 @@ import axios from 'axios';
 
 import { mangadexToComic } from '../services/mangadex.service';
 import { Comic } from '../types/comic.type';
-import { MangaListQuery, Response as MangaDexResponse } from '../types/mangadex.type';
+import {
+  MangaByIdQuery,
+  MangaListQuery,
+  Response as MangaDexResponse,
+} from '../types/mangadex.type';
 
 const MANGADEX_API_URL = 'https://api.mangadex.org';
 
@@ -45,6 +49,22 @@ export const getMangaList = async (query: MangaListQuery) => {
       data: manga,
       meta,
     };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getMangaById = async (mangaId: string, query: MangaByIdQuery) => {
+  try {
+    const url = `${MANGADEX_API_URL}/manga/${mangaId}`;
+
+    const response = await axios.get<MangaDexResponse<'entity', 'manga'>>(url, {
+      params: query,
+    });
+
+    const comic: Comic = mangadexToComic(response.data.data);
+
+    return comic;
   } catch (error) {
     throw error;
   }

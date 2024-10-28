@@ -3,7 +3,7 @@ import { Schema, ValidationOptions } from 'joi';
 
 import { HTTP_400_BAD_REQUEST } from '~/constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
-import { GetComics } from '../controllers/comic.controller';
+import { GetComicById, GetComics } from '../controllers/comic.controller';
 import { Comic } from '../types/comic.type';
 import { processValidationError, validateGetRequest } from '../utils/validation.util';
 
@@ -66,6 +66,36 @@ export const validateGetComicList = (req: Request, res: Response, next: NextFunc
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));
   } else {
     req.query = value;
+    next();
+  }
+};
+
+type GetComicByIdQuerySchema = Record<keyof Parameters<GetComicById>[0]['query'], Schema>;
+type GetComicByIdBodySchema = Record<keyof Parameters<GetComicById>[0]['params'], Schema>;
+
+export const validateGetComicById = (req: Request, res: Response, next: NextFunction) => {
+  const allowedEmbeds = ['author', 'artist', 'manga', 'cover_art', 'tag', 'creator'];
+
+  const options: ValidationOptions = {
+    stripUnknown: true,
+  };
+
+  const querySchema = Joi.object<GetComicByIdQuerySchema>({
+    _embed: Joi.array().items(Joi.string().valid(...allowedEmbeds)),
+  });
+
+  const paramSchema = Joi.object<GetComicByIdBodySchema>({
+    id: Joi.string().required(),
+  });
+
+  const { error: queryError, value: queryValue } = querySchema.validate(req.query, options);
+  const { error: paramError, value: paramValue } = paramSchema.validate(req.params, options);
+
+  if (queryError || paramError) {
+    return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(queryError! || paramError));
+  } else {
+    req.query = queryValue;
+    req.params = paramValue;
     next();
   }
 };
