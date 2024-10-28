@@ -2,16 +2,19 @@
   "name": "server",
   "main": "src/main.ts",
   "scripts": {
-    "test": "cross-env NODE_ENV=test MONGODB_URI=mongodb://localhost:27017/n2wnw420vkw7 jest --testTimeout=5000",
+    "test": "cross-env NODE_ENV=test jest --testTimeout=5000",
     "build": "npx tsc && tsc-alias",
     "start": "node -r tsconfig-paths/register dist/main.js",
     "dev": "tsx watch --ignore 'src/tests/*' src/main.ts"
   },
   "dependencies": {
     "axios": "^1.7.7",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "csrf-csrf": "^3.0.8",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "express-session": "^1.18.1",
     "joi": "^17.13.3",
     "lodash": "^4.17.21",
     "mongoose": "^8.7.1",
@@ -19,8 +22,10 @@
     "tsx": "^4.19.1"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.0",
     "@types/jest": "^29.5.13",
     "@types/lodash": "^4.17.12",
     "@types/node": "^22.7.5",
