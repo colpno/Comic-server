@@ -38,8 +38,8 @@ export interface PaginationMeta {
   totalPages: number;
 }
 
-export interface SuccessfulResponse {
-  data: unknown[] | unknown;
+export interface SuccessfulResponse<D = unknown> {
+  data: D;
   metadata?: {
     pagination?: PaginationMeta;
   };
