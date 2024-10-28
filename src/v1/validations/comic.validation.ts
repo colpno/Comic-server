@@ -7,7 +7,7 @@ import { GetComicById, GetComics } from '../controllers/comic.controller';
 import { Comic } from '../types/comic.type';
 import { processValidationError, validateGetRequest } from '../utils/validation.util';
 
-type GetComicsSchema = Record<keyof Parameters<GetComics>[0]['query'], Schema>;
+type GetComicListSchema = Record<keyof Parameters<GetComics>[0]['query'], Schema>;
 
 export const validateGetComicList = (req: Request, res: Response, next: NextFunction) => {
   const { _select, _embed, _sort, ...commands } = validateGetRequest;
@@ -29,7 +29,7 @@ export const validateGetComicList = (req: Request, res: Response, next: NextFunc
     stripUnknown: true,
   };
 
-  const schema = Joi.object<GetComicsSchema>({
+  const schema = Joi.object<GetComicListSchema>({
     ...commands,
     _sort: Joi.object().pattern(
       Joi.string().valid(...allowedSorts),
@@ -70,8 +70,10 @@ export const validateGetComicList = (req: Request, res: Response, next: NextFunc
   }
 };
 
-type GetComicByIdQuerySchema = Record<keyof Parameters<GetComicById>[0]['query'], Schema>;
-type GetComicByIdBodySchema = Record<keyof Parameters<GetComicById>[0]['params'], Schema>;
+type GetComicByIdSchema = {
+  query: Record<keyof Parameters<GetComicById>[0]['query'], Schema>;
+  params: Record<keyof Parameters<GetComicById>[0]['params'], Schema>;
+};
 
 export const validateGetComicById = (req: Request, res: Response, next: NextFunction) => {
   const allowedEmbeds = ['author', 'artist', 'manga', 'cover_art', 'tag', 'creator'];
@@ -80,12 +82,12 @@ export const validateGetComicById = (req: Request, res: Response, next: NextFunc
     stripUnknown: true,
   };
 
-  const querySchema = Joi.object<GetComicByIdQuerySchema>({
-    _embed: Joi.array().items(Joi.string().valid(...allowedEmbeds)),
+  const paramSchema = Joi.object<GetComicByIdSchema['params']>({
+    id: Joi.string().required(),
   });
 
-  const paramSchema = Joi.object<GetComicByIdBodySchema>({
-    id: Joi.string().required(),
+  const querySchema = Joi.object<GetComicByIdSchema['query']>({
+    _embed: Joi.array().items(Joi.string().valid(...allowedEmbeds)),
   });
 
   const { error: queryError, value: queryValue } = querySchema.validate(req.query, options);

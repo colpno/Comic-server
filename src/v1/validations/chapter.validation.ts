@@ -8,14 +8,10 @@ import { GetChaptersByMangaId } from '../controllers/chapter.controller';
 import { Response } from '../types/api.type';
 import { processValidationError } from '../utils/validation.util';
 
-type GetChaptersByComicIdQuerySchema = Record<
-  keyof Parameters<GetChaptersByMangaId>['0']['query'],
-  Schema
->;
-type GetChaptersByComicIdParamSchema = Record<
-  keyof Parameters<GetChaptersByMangaId>['0']['params'],
-  Schema
->;
+type GetChaptersByComicIdSchema = {
+  query: Record<keyof Parameters<GetChaptersByMangaId>['0']['query'], Schema>;
+  params: Record<keyof Parameters<GetChaptersByMangaId>['0']['params'], Schema>;
+};
 
 export const validateGetChaptersByComicId = (req: Request, res: Response, next: NextFunction) => {
   const allowedIncludes = ['emptyPages', 'futurePublishAt', 'externalUrl'];
@@ -24,11 +20,11 @@ export const validateGetChaptersByComicId = (req: Request, res: Response, next: 
     stripUnknown: true,
   };
 
-  const paramSchema = Joi.object<GetChaptersByComicIdParamSchema>({
+  const paramSchema = Joi.object<GetChaptersByComicIdSchema['params']>({
     id: Joi.string().required(),
   });
 
-  const querySchema = Joi.object<GetChaptersByComicIdQuerySchema>({
+  const querySchema = Joi.object<GetChaptersByComicIdSchema['query']>({
     _limit: Joi.number().integer().min(1).max(100).default(PAGINATION_PER_PAGE),
     _page: Joi.number().integer().min(1).default(PAGINATION_PAGE),
     _sort: Joi.object().pattern(Joi.string(), Joi.string().valid('asc', 'desc')),
@@ -46,13 +42,13 @@ export const validateGetChaptersByComicId = (req: Request, res: Response, next: 
   }
 };
 
-type GetChapterContentParamSchema = Record<
+type GetChapterContentSchema = Record<
   keyof Parameters<GetChaptersByMangaId>['0']['params'],
   Schema
 >;
 
 export const validateGetChapterContent = (req: Request, res: Response, next: NextFunction) => {
-  const paramSchema = Joi.object<GetChapterContentParamSchema>({
+  const paramSchema = Joi.object<GetChapterContentSchema>({
     id: Joi.string().required(),
   });
 
