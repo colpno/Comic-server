@@ -1,16 +1,21 @@
-export interface Chapter {
+import { MongoDocFields } from './common.type';
+
+export type Chapter = {
   id: string;
   title: string;
   /** Belongs to which volume. */
-  volume?: string;
+  volume?: number;
   /** The chapter number in numeric. */
-  chapter?: string;
+  chapter?: number;
   /** Urls. */
-  content?: string[];
-  publishAt: string | null;
-  readableAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  content?: ChapterContent[];
+  publishAt?: string;
+  readableAt?: string;
   /** The number of images. */
   pages?: number;
+} & Pick<MongoDocFields, 'createdAt' | 'updatedAt'>;
+
+interface ChapterContent {
+  data: string;
+  dataSaver?: string;
 }

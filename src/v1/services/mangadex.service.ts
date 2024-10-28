@@ -1,5 +1,6 @@
+import { Chapter } from '../types/chapter.type';
 import { Comic } from '../types/comic.type';
-import { ResponseManga } from '../types/mangadex.type';
+import { ResponseChapter, ResponseManga } from '../types/mangadex.type';
 
 export const mangadexToComic = (manga: ResponseManga): Comic => {
   const coverFilename =
@@ -54,3 +55,16 @@ export const mangadexToComic = (manga: ResponseManga): Comic => {
     }, [] as string[]),
   };
 };
+
+export const mangadexToChapter = (chapter: ResponseChapter): Chapter => ({
+  id: chapter.id,
+  title: chapter.attributes.title,
+  volume: chapter.attributes.volume ? parseInt(chapter.attributes.volume) : undefined,
+  chapter: chapter.attributes.chapter ? parseInt(chapter.attributes.chapter) : undefined,
+  content: undefined,
+  publishAt: chapter.attributes.publishAt || undefined,
+  readableAt: chapter.attributes.readableAt || undefined,
+  createdAt: chapter.attributes.createdAt,
+  updatedAt: chapter.attributes.updatedAt,
+  pages: chapter.attributes.pages || undefined,
+});

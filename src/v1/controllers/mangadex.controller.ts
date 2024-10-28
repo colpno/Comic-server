@@ -1,9 +1,11 @@
 import axios from 'axios';
 
-import { mangadexToComic } from '../services/mangadex.service';
+import { mangadexToChapter, mangadexToComic } from '../services/mangadex.service';
+import { Chapter } from '../types/chapter.type';
 import { Comic } from '../types/comic.type';
 import {
   MangaByIdQuery,
+  MangaFeedQuery,
   MangaListQuery,
   Response as MangaDexResponse,
 } from '../types/mangadex.type';
@@ -65,6 +67,41 @@ export const getMangaById = async (mangaId: string, query: MangaByIdQuery) => {
     const comic: Comic = mangadexToComic(response.data.data);
 
     return comic;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getChaptersByMangaId = async (mangaId: string, query: MangaFeedQuery) => {
+  try {
+    const { limit, offset, order, include: includes, exclude: excludes } = query;
+    const url = `${MANGADEX_API_URL}/manga/${mangaId}/feed`;
+
+    const includeParam = includes?.reduce((acc, include) => {
+      acc[`include${include[0].toUpperCase()}${include.slice(1)}`] = 1;
+      return acc;
+    }, {} as Record<string, 1>);
+
+    const excludeParam = excludes?.reduce((acc, exclude) => {
+      acc[`exclude${exclude[0].toUpperCase()}${exclude.slice(1)}`] = 0;
+      return acc;
+    }, {} as Record<string, 0>);
+
+    const response = await axios.get<MangaDexResponse<'collection', 'chapter'>>(url, {
+      params: {
+        ...includeParam,
+        ...excludeParam,
+        contentRating: ['safe', 'suggestive'],
+        limit,
+        offset,
+        order,
+      },
+    });
+    const { data } = response;
+
+    const chapters: Chapter[] = data.data.map((chapter) => mangadexToChapter(chapter));
+
+    return chapters;
   } catch (error) {
     throw error;
   }
