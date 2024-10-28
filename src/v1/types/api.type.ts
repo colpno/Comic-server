@@ -19,14 +19,10 @@ export interface PaginationMeta {
   links: {
     /**
      * The link to the next page.
-     * @example
-     * /api/v1/users?page=3
      */
     next?: string;
     /**
      * The link to the previous page.
-     * @example
-     * /api/v1/users?page=1
      */
     previous?: string;
   };
@@ -55,8 +51,6 @@ export interface ErrorResponseMetadata {
   timestamp: string;
   /**
    * The request endpoint.
-   * @example
-   * /api/v1/users
    */
   endpoint: ExpressRequest['originalUrl'];
   httpMethod: ExpressRequest['method'];

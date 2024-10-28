@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 
 import { PAGINATION_PAGE, PAGINATION_PER_PAGE } from '~/constants/global.constant';
+import { BASE_ENDPOINT } from '../configs/common.conf';
 import { GetRequestArgs, SuccessfulResponse } from '../types/api.type';
 import { Comic } from '../types/comic.type';
 import { MangaListQuery, ResponseManga } from '../types/mangadex.type';
@@ -47,7 +48,7 @@ export const getComicList: GetComics = async (req, res, next) => {
         pagination: generatePaginationMeta({
           page: _page,
           perPage: _limit,
-          endpoint: '/api/v1/comics',
+          endpoint: `${BASE_ENDPOINT}/comics`,
           totalItems: meta.totalItems,
           totalPages: meta.totalPages,
         }),

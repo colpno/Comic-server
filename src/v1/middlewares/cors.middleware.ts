@@ -1,12 +1,10 @@
-import cors, { CorsOptions } from 'cors';
+import cors from 'cors';
 
 import { CORS_ORIGINS } from '../configs/common.conf';
 
-const options: CorsOptions = {
+const middleware = cors({
   origin: CORS_ORIGINS.split(' '),
   credentials: true,
-};
-
-const middleware = cors(options);
+});
 
 export default middleware;

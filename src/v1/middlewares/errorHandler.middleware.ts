@@ -8,6 +8,8 @@ import { generateErrorMetadata } from '../utils/meta.util';
 
 config();
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunction): void => {
   if (error instanceof MongooseError) {
     const { message, name, stack } = error;
@@ -17,7 +19,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
       error: true,
       reason: message,
     };
-    if (process.env.NODE_ENV !== 'production') {
+    if (!isProduction) {
       data.metadata = generateErrorMetadata(req, { errorName: name, stackTrace: stack || '' });
     }
 
@@ -34,7 +36,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
       error: true,
       reason: error,
     };
-    if (process.env.NODE_ENV !== 'production') {
+    if (!isProduction) {
       data.metadata = generateErrorMetadata(req);
     }
 
@@ -53,7 +55,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
       error: isError,
       reason,
     };
-    if (process.env.NODE_ENV !== 'production') {
+    if (!isProduction) {
       data.metadata = generateErrorMetadata(req, { errorName: name, stackTrace: stack || '' });
     }
 
@@ -72,7 +74,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
       error: true,
       reason,
     };
-    if (process.env.NODE_ENV !== 'production') {
+    if (!isProduction) {
       data.metadata = generateErrorMetadata(req, { errorName: name, stackTrace: stack ?? '' });
     }
 
@@ -88,7 +90,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
     error: true,
     reason: 'Unknown error',
   };
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProduction) {
     data.metadata = generateErrorMetadata(req);
   }
 
