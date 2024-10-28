@@ -1,5 +1,5 @@
 import { NextFunction, Request } from 'express';
-import { Schema } from 'joi';
+import { Schema, ValidationOptions } from 'joi';
 
 import { PAGINATION_PAGE, PAGINATION_PER_PAGE } from '~/constants/global.constant';
 import { HTTP_400_BAD_REQUEST } from '~/constants/httpCode.constant';
@@ -8,19 +8,27 @@ import { GetChaptersByMangaId } from '../controllers/chapter.controller';
 import { Response } from '../types/api.type';
 import { processValidationError } from '../utils/validation.util';
 
-type GetChaptersByMangaIdSchema = Record<
+type GetChaptersByComicIdQuerySchema = Record<
   keyof Parameters<GetChaptersByMangaId>['0']['query'],
+  Schema
+>;
+type GetChaptersByComicIdParamSchema = Record<
+  keyof Parameters<GetChaptersByMangaId>['0']['params'],
   Schema
 >;
 
 export const validateGetChaptersByComicId = (req: Request, res: Response, next: NextFunction) => {
   const allowedIncludes = ['emptyPages', 'futurePublishAt', 'externalUrl'];
 
-  const paramSchema = Joi.object({
+  const options: ValidationOptions = {
+    stripUnknown: true,
+  };
+
+  const paramSchema = Joi.object<GetChaptersByComicIdParamSchema>({
     id: Joi.string().required(),
   });
 
-  const querySchema = Joi.object<GetChaptersByMangaIdSchema>({
+  const querySchema = Joi.object<GetChaptersByComicIdQuerySchema>({
     _limit: Joi.number().integer().min(1).max(100).default(PAGINATION_PER_PAGE),
     _page: Joi.number().integer().min(1).default(PAGINATION_PAGE),
     _sort: Joi.object().pattern(Joi.string(), Joi.string().valid('asc', 'desc')),
@@ -29,10 +37,29 @@ export const validateGetChaptersByComicId = (req: Request, res: Response, next: 
   });
 
   const { error: paramError } = paramSchema.validate(req.params);
-  const { error: queryError } = querySchema.validate(req.query);
+  const { error: queryError } = querySchema.validate(req.query, options);
 
   if (paramError || queryError) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(paramError! || queryError));
+  } else {
+    next();
+  }
+};
+
+type GetChapterContentParamSchema = Record<
+  keyof Parameters<GetChaptersByMangaId>['0']['params'],
+  Schema
+>;
+
+export const validateGetChapterContent = (req: Request, res: Response, next: NextFunction) => {
+  const paramSchema = Joi.object<GetChapterContentParamSchema>({
+    id: Joi.string().required(),
+  });
+
+  const { error } = paramSchema.validate(req.params);
+
+  if (error) {
+    return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));
   } else {
     next();
   }

@@ -1,7 +1,8 @@
 import { RequestHandler } from 'express';
 
 import { GetRequestArgs, SuccessfulResponse } from '../types/api.type';
-import { getChaptersByMangaId as getChaptersByMangaIdFn } from './mangadex.controller';
+import { Chapter } from '../types/chapter.type';
+import * as mangadexController from './mangadex.controller';
 
 type GetChaptersByMangaIdQuery =
   | (Omit<GetRequestArgs, '_select' | '_embed'> & {
@@ -23,9 +24,23 @@ export const getChaptersByComicId: GetChaptersByMangaId = async (req, res, next)
   try {
     const { id: mangaId } = req.params;
 
-    const chapters = await getChaptersByMangaIdFn(mangaId, req.query);
+    const chapters = await mangadexController.getChaptersByMangaId(mangaId, req.query);
 
     return res.json({ data: chapters });
+  } catch (error) {
+    next(error);
+  }
+};
+
+type GetChapterContent = RequestHandler<{ id: string }, SuccessfulResponse<Chapter['content']>>;
+
+export const getChapterContent: GetChapterContent = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const ChapterContent = await mangadexController.getChapterContent(id);
+
+    return res.json({ data: ChapterContent });
   } catch (error) {
     next(error);
   }

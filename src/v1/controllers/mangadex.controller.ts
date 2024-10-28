@@ -4,6 +4,7 @@ import { mangadexToChapter, mangadexToComic } from '../services/mangadex.service
 import { Chapter } from '../types/chapter.type';
 import { Comic } from '../types/comic.type';
 import {
+  ChapterImages,
   MangaByIdQuery,
   MangaFeedQuery,
   MangaListQuery,
@@ -105,4 +106,25 @@ export const getChaptersByMangaId = async (mangaId: string, query: MangaFeedQuer
   } catch (error) {
     throw error;
   }
+};
+
+export const getChapterContent = async (chapterId: Chapter['id']) => {
+  const url = `${MANGADEX_API_URL}/at-home/server/${chapterId}`;
+
+  const response = await axios.get<ChapterImages>(url);
+  const { data } = response;
+
+  const result: Chapter['content'] = [];
+  const imageLength = data.chapter.data.length;
+  for (let i = 0; i < imageLength; i++) {
+    const image = data.chapter.data[i];
+    const compressed = data.chapter.dataSaver[i];
+
+    result.push({
+      data: `${data.baseUrl}/data/${data.chapter.hash}/${image}`,
+      dataSaver: `${data.baseUrl}/data/${data.chapter.hash}/${compressed}`,
+    });
+  }
+
+  return result;
 };
