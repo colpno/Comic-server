@@ -1,10 +1,8 @@
 import app from './app';
 import { PORT } from './configs/app.conf';
-import MongoDB from './databases/MongoDB.database';
+import { MongoDB } from './databases/MongoDB.database';
 
-const mongoDB = new MongoDB();
-
-mongoDB
+new MongoDB()
   .connect()
   .then(() => {
     console.log('Connected to database');

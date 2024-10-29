@@ -3,9 +3,9 @@ import { Comic } from '../types/comic.type';
 import { ResponseChapter, ResponseManga } from '../types/mangadex.type';
 
 export const mangadexToComic = (manga: ResponseManga): Comic => {
+  const coverArt = manga.relationships.find((relationship) => relationship.type === 'cover_art');
   const coverFilename =
-    manga.relationships.find((relationship) => relationship.type === 'cover_art')?.attributes
-      ?.fileName || '';
+    coverArt?.attributes && 'fileName' in coverArt.attributes ? coverArt.attributes.fileName : '';
 
   return {
     id: manga.id,
