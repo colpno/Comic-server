@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Schema, ValidationOptions } from 'joi';
 
-import { HTTP_400_BAD_REQUEST } from '~/constants/httpCode.constant';
+import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
 import { GetComicById, GetComics } from '../controllers/comic.controller';
 import { Comic } from '../types/comic.type';

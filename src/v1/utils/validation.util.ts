@@ -1,6 +1,6 @@
 import { Schema, ValidationResult } from 'joi';
 
-import { HTTP_400_BAD_REQUEST } from '~/constants/httpCode.constant';
+import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
 import { Embed, FailedResponse, GetRequestArgs } from '../types/api.type';
 import {

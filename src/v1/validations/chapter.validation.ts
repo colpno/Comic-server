@@ -1,8 +1,8 @@
 import { NextFunction, Request } from 'express';
 import { Schema, ValidationOptions } from 'joi';
 
-import { PAGINATION_PAGE, PAGINATION_PER_PAGE } from '~/constants/global.constant';
-import { HTTP_400_BAD_REQUEST } from '~/constants/httpCode.constant';
+import { PAGINATION_PAGE, PAGINATION_PER_PAGE } from '../../constants/global.constant';
+import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
 import { GetChaptersByMangaId } from '../controllers/chapter.controller';
 import { Response } from '../types/api.type';

@@ -1,6 +1,6 @@
 import { connect as connectToDB } from 'mongoose';
 
-import { MONGODB_URI } from '~/configs/database.conf';
+import { MONGODB_URI } from '../configs/database.conf';
 
 export default class MongoDB {
   async connect() {

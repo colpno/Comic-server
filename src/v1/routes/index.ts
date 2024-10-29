@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { HTTP_200_OK } from '~/constants/httpCode.constant';
+import { HTTP_200_OK } from '../../constants/httpCode.constant';
 import authRouter from './auth.route';
 import chapterRouter from './chapter.route';
 import comicRouter from './comic.route';
