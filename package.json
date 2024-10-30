@@ -19,6 +19,7 @@
     "joi": "^17.13.3",
     "lodash": "^4.17.21",
     "mongoose": "^8.7.1",
+    "tspec": "^0.1.116",
     "tsx": "^4.19.1"
   },
   "devDependencies": {

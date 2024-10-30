@@ -6,8 +6,8 @@ import * as mangadexController from './mangadex.controller';
 
 type GetChaptersByMangaIdQuery =
   | (Omit<GetRequestArgs, '_select' | '_embed'> & {
-      include: ('emptyPages' | 'futurePublishAt' | 'externalUrl')[];
-      exclude: ('emptyPages' | 'futurePublishAt' | 'externalUrl')[];
+      include?: ('emptyPages' | 'futurePublishAt' | 'externalUrl')[];
+      exclude?: ('emptyPages' | 'futurePublishAt' | 'externalUrl')[];
     })
   // There is an error when adding additional query parameters like above: "missing props in ParsedQS" occurs when using getChaptersByMangaId in routes.
   // Some are not facing the issue, but some are.
@@ -15,8 +15,8 @@ type GetChaptersByMangaIdQuery =
   | qs.ParsedQs;
 export type GetChaptersByMangaId = RequestHandler<
   { id: string },
-  SuccessfulResponse,
-  {},
+  SuccessfulResponse<Chapter[]>,
+  null,
   GetChaptersByMangaIdQuery
 >;
 

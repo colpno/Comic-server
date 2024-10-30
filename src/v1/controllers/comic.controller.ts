@@ -15,9 +15,12 @@ type GetComicsQuery = Omit<
   GetRequestArgs & Omit<MangaListQuery, 'limit' | 'offset' | 'order'>,
   '_select' | '_embed'
 > & {
+  /**
+   * Available values: cover_art, manga, author, artist, tag
+   */
   _embed?: MangaRelationship | { path: MangaRelationship } | { path: MangaRelationship }[];
 };
-export type GetComics = RequestHandler<{}, SuccessfulResponse, {}, GetComicsQuery>;
+export type GetComics = RequestHandler<{}, SuccessfulResponse<Comic[]>, null, GetComicsQuery>;
 
 export const getComicList: GetComics = async (req, res, next) => {
   try {
@@ -62,11 +65,14 @@ export const getComicList: GetComics = async (req, res, next) => {
 };
 
 type GetComicByIdQuery = {
-  _embed: MangaRelationship | { path: MangaRelationship } | { path: MangaRelationship }[];
+  /**
+   * Available values: cover_art, manga, author, artist, tag
+   */
+  _embed?: MangaRelationship | { path: MangaRelationship } | { path: MangaRelationship }[];
 };
 export type GetComicById = RequestHandler<
   { id: string },
-  SuccessfulResponse,
+  SuccessfulResponse<Comic>,
   {},
   GetComicByIdQuery
 >;

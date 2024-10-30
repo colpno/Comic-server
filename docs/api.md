@@ -38,9 +38,6 @@
   - [Error payload](#error-response-payload)
   - [HTTP Codes](#http-codes)
 - [Routes](#routes)
-  - [Health check](#health-check)
-  - [Auth](#auth-1)
-    - [CSRF generating](#csrf)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -917,55 +914,6 @@ A few rules the response has to follow:
 
 ## Routes
 
-All endpoints start with the `/api/v1`.
+### V1
 
-### Health check
-
----
-
-A route for checking availability of the corresponding versioning endpoint.
-This route is always exist for every available versioning endpoint.
-
-#### HTTP method
-
-`GET`
-
-#### Endpoint
-
-```js
-/health
-```
-
-#### Response
-
-> | HTTP code | content-type       | response          |
-> | :-------: | ------------------ | ----------------- |
-> |   `200`   | `application/json` | `{"status":"ok"}` |
-
-If the HTTP code is other than 200, then the endpoint isn't available.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### Auth
-
----
-
-### CSRF
-
-#### HTTP method
-
-`GET`
-
-#### Endpoint
-
-```js
-/auth/csrf-token
-```
-
-#### Response
-
-> | HTTP code | content-type       | response                       |
-> | :-------: | ------------------ | ------------------------------ |
-> |   `200`   | `application/json` | `{"csrfToken":"<csrf-token>"}` |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Visit [http://localhost:3000/api/v1/docs](http://localhost:3000/api/v1/docs).
