@@ -30,7 +30,7 @@ export const generatePaginationMeta = ({
 
 export const generateErrorMetadata = (
   req: Request,
-  overide?: Partial<ErrorResponseMetadata>
+  override?: Partial<ErrorResponseMetadata>
 ): ErrorResponseMetadata => ({
   requestId: req.headers['x-request-id'] as string,
   timestamp: new Date().toISOString(),
@@ -39,5 +39,5 @@ export const generateErrorMetadata = (
   stackTrace: '',
   errorName: '',
   environment: process.env.NODE_ENV as string,
-  ...overide,
+  ...override,
 });

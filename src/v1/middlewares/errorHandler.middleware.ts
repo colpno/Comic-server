@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import { Error as MongooseError } from 'mongoose';
 
+import { HTTP_500_SERVER_ERROR } from '../../constants/httpCode.constant';
 import { FailedResponse } from '../types/api.type';
 import { GeneralError } from '../utils/error.utils';
 import { generateErrorMetadata } from '../utils/meta.util';
@@ -15,7 +16,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
     const { message, name, stack } = error;
 
     const data: FailedResponse = {
-      code: 500,
+      code: HTTP_500_SERVER_ERROR,
       error: true,
       reason: message,
     };
@@ -32,7 +33,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
 
   if (typeof error === 'string') {
     const data: FailedResponse = {
-      code: 500,
+      code: HTTP_500_SERVER_ERROR,
       error: true,
       reason: error,
     };
@@ -70,7 +71,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
     const { stack, message: reason, name } = error;
 
     const data: FailedResponse = {
-      code: 500,
+      code: HTTP_500_SERVER_ERROR,
       error: true,
       reason,
     };
@@ -86,7 +87,7 @@ const errorHandler = (error: unknown, req: Request, res: Response, _?: NextFunct
   }
 
   const data: FailedResponse = {
-    code: 500,
+    code: HTTP_500_SERVER_ERROR,
     error: true,
     reason: 'Unknown error',
   };
