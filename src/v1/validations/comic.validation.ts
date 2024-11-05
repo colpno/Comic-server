@@ -9,7 +9,7 @@ import { processValidationError, validateGetRequest } from '../utils/validation.
 
 type GetComicListSchema = Record<keyof Parameters<GetComics>[0]['query'], Schema>;
 
-export const validateGetComicList = (req: Request, res: Response, next: NextFunction) => {
+export const getComicList = (req: Request, res: Response, next: NextFunction) => {
   const { _select, _embed, _sort, ...commands } = validateGetRequest;
   const allowedTypes: Comic['type'][] = ['manga', 'manhwa', 'manhua'];
   const allowedStatuses: Comic['status'][] = ['ongoing', 'completed', 'hiatus', 'cancelled'];
@@ -64,10 +64,12 @@ export const validateGetComicList = (req: Request, res: Response, next: NextFunc
 
   if (error) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));
-  } else {
-    req.query = value;
-    next();
   }
+
+  req.originalQuery = req.query;
+  req.query = value;
+
+  next();
 };
 
 type GetComicByIdSchema = {
@@ -75,7 +77,7 @@ type GetComicByIdSchema = {
   params: Record<keyof Parameters<GetComicById>[0]['params'], Schema>;
 };
 
-export const validateGetComicById = (req: Request, res: Response, next: NextFunction) => {
+export const getComicById = (req: Request, res: Response, next: NextFunction) => {
   const allowedEmbeds = ['author', 'artist', 'manga', 'cover_art', 'tag', 'creator'];
 
   const options: ValidationOptions = {
@@ -95,9 +97,12 @@ export const validateGetComicById = (req: Request, res: Response, next: NextFunc
 
   if (queryError || paramError) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(queryError! || paramError));
-  } else {
-    req.query = queryValue;
-    req.params = paramValue;
-    next();
   }
+
+  req.originalParams = req.params;
+  req.originalQuery = req.query;
+  req.query = queryValue;
+  req.params = paramValue;
+
+  next();
 };

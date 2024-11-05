@@ -1,9 +1,9 @@
 import { NextFunction, Request } from 'express';
 import { Schema, ValidationOptions } from 'joi';
 
-import { PAGINATION_PAGE, PAGINATION_PER_PAGE } from '../../constants/global.constant';
 import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
+import { PAGINATION_PAGE, PAGINATION_PER_PAGE } from '../constants/common.constant';
 import { GetChaptersByMangaId } from '../controllers/chapter.controller';
 import { Response } from '../types/api.type';
 import { processValidationError } from '../utils/validation.util';
@@ -13,7 +13,7 @@ type GetChaptersByComicIdSchema = {
   params: Record<keyof Parameters<GetChaptersByMangaId>['0']['params'], Schema>;
 };
 
-export const validateGetChaptersByComicId = (req: Request, res: Response, next: NextFunction) => {
+export const getChaptersByComicId = (req: Request, res: Response, next: NextFunction) => {
   const allowedIncludes = ['emptyPages', 'futurePublishAt', 'externalUrl'];
 
   const options: ValidationOptions = {
@@ -32,14 +32,19 @@ export const validateGetChaptersByComicId = (req: Request, res: Response, next: 
     exclude: Joi.array().items(Joi.string().valid(...allowedIncludes)),
   });
 
-  const { error: paramError } = paramSchema.validate(req.params);
-  const { error: queryError } = querySchema.validate(req.query, options);
+  const { error: paramError, value: paramValue } = paramSchema.validate(req.params);
+  const { error: queryError, value: queryValue } = querySchema.validate(req.query, options);
 
   if (paramError || queryError) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(paramError! || queryError));
-  } else {
-    next();
   }
+
+  req.originalParams = req.params;
+  req.originalQuery = req.query;
+  req.params = paramValue;
+  req.query = queryValue;
+
+  next();
 };
 
 type GetChapterContentSchema = Record<
@@ -47,16 +52,19 @@ type GetChapterContentSchema = Record<
   Schema
 >;
 
-export const validateGetChapterContent = (req: Request, res: Response, next: NextFunction) => {
+export const getChapterContent = (req: Request, res: Response, next: NextFunction) => {
   const paramSchema = Joi.object<GetChapterContentSchema>({
     id: Joi.string().required(),
   });
 
-  const { error } = paramSchema.validate(req.params);
+  const { error, value } = paramSchema.validate(req.params);
 
   if (error) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));
-  } else {
-    next();
   }
+
+  req.originalParams = req.params;
+  req.params = value;
+
+  next();
 };
