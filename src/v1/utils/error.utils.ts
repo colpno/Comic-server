@@ -30,7 +30,7 @@ export class Error400 extends GeneralError {
 export class Error401 extends GeneralError {
   name: string = 'UnauthorizedError';
 
-  constructor(message: string) {
+  constructor(message: string = 'Unauthorized') {
     super({ message, code: 401 });
   }
 }
@@ -38,7 +38,7 @@ export class Error401 extends GeneralError {
 export class Error403 extends GeneralError {
   name: string = 'ForbiddenError';
 
-  constructor(message: string) {
+  constructor(message: string = 'Forbidden') {
     super({ message, code: 403 });
   }
 }
@@ -46,7 +46,7 @@ export class Error403 extends GeneralError {
 export class Error404 extends GeneralError {
   name: string = 'NotFoundError';
 
-  constructor(message: string) {
+  constructor(message: string = 'Not Found') {
     super({ message, code: 404 });
   }
 }
