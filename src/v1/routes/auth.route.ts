@@ -1,10 +1,10 @@
 import { Router } from 'express';
 
-import { generateCSRFToken } from '../controllers/auth.controller';
+import { authController } from '../controllers';
 
 const router = Router();
 
-router.get('/csrf-token', generateCSRFToken);
+router.get('/csrf-token', authController.generateCSRFToken);
 
 const authRouter = router;
 export default authRouter;
