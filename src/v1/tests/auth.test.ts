@@ -35,6 +35,8 @@ afterAll((done) => {
 describe('Auth', () => {
   let csrfToken: string | undefined = undefined;
   let csrfTokenCookie: string[] | undefined = undefined;
+  let accessToken: string | undefined = undefined;
+  let refreshToken: string | undefined = undefined;
 
   it('should return a csrf token in both cookie and body', async () => {
     const endpoint = getEndpoint({ extends: '/csrf-token' });
@@ -120,6 +122,34 @@ describe('Auth', () => {
       expect(responseAccessToken).toBeDefined();
       expect(refreshTokenCookie).toBeDefined();
       expect(isProperlySetRefreshTokenCookie).toBe(true);
+
+      accessToken = responseAccessToken;
+      refreshToken = refreshTokenCookie;
+    });
+  });
+
+  describe('Logout', () => {
+    it('should return 401 when accessing /logout without authorization', async () => {
+      const endpoint = getEndpoint({ extends: '/logout' });
+
+      const response = await request(app).get(endpoint);
+
+      expect(response.status).toBe(401);
+    });
+
+    it('should logout successfully when already authorizing', async () => {
+      if (!(accessToken && refreshToken)) {
+        throw new Error('accessToken and refreshToken are not set');
+      }
+
+      const endpoint = getEndpoint({ extends: '/logout' });
+
+      const response = await request(app)
+        .get(endpoint)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('Cookie', refreshToken);
+
+      expect(response.status).toBe(204);
     });
   });
 });

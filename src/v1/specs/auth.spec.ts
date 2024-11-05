@@ -19,5 +19,11 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         handler: typeof authController.login;
       };
     };
+    '/logout': {
+      get: {
+        summary: 'Logout';
+        handler: typeof authController.login;
+      };
+    };
   };
 }>;

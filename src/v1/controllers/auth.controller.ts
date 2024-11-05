@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import moment from 'moment';
 
+import { HTTP_204_NO_CONTENT } from '../../constants/httpCode.constant';
 import {
   ACCESS_TOKEN_SECRET,
   COOKIE_NAME_REFRESH_TOKEN,
@@ -63,6 +64,33 @@ export const login: Login = async (req, res, next) => {
 
     res.cookie(COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookieConfig);
     return res.json({ data: accessToken });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logout: RequestHandler = async (req, res, next) => {
+  try {
+    const refreshToken = req.cookies?.[COOKIE_NAME_REFRESH_TOKEN];
+
+    // No refresh token in the cookie
+    if (!refreshToken) {
+      return res.sendStatus(HTTP_204_NO_CONTENT);
+    }
+
+    const userWithRefreshToken = await getUser({ refreshToken });
+
+    // User without the refresh token
+    if (!userWithRefreshToken) {
+      res.clearCookie(COOKIE_NAME_REFRESH_TOKEN);
+      return res.sendStatus(HTTP_204_NO_CONTENT);
+    }
+
+    // User with the refresh token: clear the refresh token
+    // await updateUser({ _id: userWithRefreshToken._id }, { refreshToken: '' });
+    res.clearCookie(COOKIE_NAME_REFRESH_TOKEN);
+
+    return res.sendStatus(HTTP_204_NO_CONTENT);
   } catch (error) {
     next(error);
   }
