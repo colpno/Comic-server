@@ -14,7 +14,7 @@ import { getUser } from '../services/user.service';
 import { SuccessfulResponse } from '../types/api.type';
 import { JWTPayload } from '../types/common.type';
 import { hashString } from '../utils/crypto';
-import { Error400, Error404 } from '../utils/error.utils';
+import { Error400, Error403, Error404 } from '../utils/error.utils';
 
 const MS_15MINS = moment.duration(15, 'minutes').asMilliseconds();
 const MS_1DAY = moment.duration(1, 'day').asMilliseconds();
@@ -91,6 +91,41 @@ export const logout: RequestHandler = async (req, res, next) => {
     res.clearCookie(COOKIE_NAME_REFRESH_TOKEN);
 
     return res.sendStatus(HTTP_204_NO_CONTENT);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refreshAccessToken: RequestHandler = async (req, res, next) => {
+  try {
+    const refreshToken = req.cookies?.[COOKIE_NAME_REFRESH_TOKEN];
+
+    // No refresh token in the cookie
+    if (!refreshToken) {
+      throw new Error403();
+    }
+
+    // Find the user with the refresh token
+    const user = await getUser({ refreshToken });
+
+    if (!user) {
+      throw new Error404('User not found');
+    }
+
+    jwt.verify(refreshToken, REFRESH_TOKEN_SECRET, (err: unknown, decoded: unknown) => {
+      if (err) {
+        throw new Error403('Invalid Refresh Token');
+      }
+
+      // Create a new access token
+      const decodedPayload = decoded as JWTPayload;
+      const payload = {
+        userId: decodedPayload.userId,
+      };
+      const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: MS_15MINS });
+
+      return res.json({ data: accessToken });
+    });
   } catch (error) {
     next(error);
   }

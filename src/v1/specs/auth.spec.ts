@@ -25,5 +25,11 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         handler: typeof authController.login;
       };
     };
+    '/refresh-token': {
+      get: {
+        summary: 'Refresh access token';
+        handler: typeof authController.refreshAccessToken;
+      };
+    };
   };
 }>;

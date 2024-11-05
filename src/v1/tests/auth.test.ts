@@ -128,6 +128,41 @@ describe('Auth', () => {
     });
   });
 
+  describe('Refresh Token', () => {
+    it('should return 403 when refreshing access token without refresh token', async () => {
+      const endpoint = getEndpoint({ extends: '/refresh-token' });
+
+      const response = await request(app).get(endpoint);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('should return 403 when refreshing access token with invalid refresh token', async () => {
+      const endpoint = getEndpoint({ extends: '/refresh-token' });
+
+      const response = await request(app)
+        .get(endpoint)
+        .set('Cookie', `${COOKIE_NAME_REFRESH_TOKEN}=invalid_refresh_token`);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('should return new access token with a valid refresh token', async () => {
+      if (!refreshToken) {
+        throw new Error('refreshToken is not set');
+      }
+
+      const endpoint = getEndpoint({ extends: '/refresh-token' });
+
+      const response = await request(app).get(endpoint).set('Cookie', refreshToken);
+
+      const { data: newAccessToken } = response.body as SuccessfulResponse<string>;
+
+      expect(response.status).toBe(200);
+      expect(newAccessToken).toBeDefined();
+    });
+  });
+
   describe('Logout', () => {
     it('should return 401 when accessing /logout without authorization', async () => {
       const endpoint = getEndpoint({ extends: '/logout' });

@@ -12,6 +12,7 @@ router.use(doubleCsrfProtection);
 
 router.post('/login', authValidator.login, authController.login);
 router.get('/logout', verifyAccessToken, authController.logout);
+router.get('/refresh-token', authController.refreshAccessToken);
 
 const authRouter = router;
 export default authRouter;
