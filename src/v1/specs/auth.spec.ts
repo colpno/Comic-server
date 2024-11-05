@@ -1,7 +1,7 @@
 import { Tspec } from 'tspec';
 
-import { BASE_ENDPOINT } from '../configs/common.conf';
-import { generateCSRFToken } from '../controllers/auth.controller';
+import { BASE_ENDPOINT } from '../constants/common.constant';
+import * as authController from '../controllers/auth.controller';
 
 export type AuthApiSpec = Tspec.DefineApiSpec<{
   basePath: `${typeof BASE_ENDPOINT}/auth`;
@@ -10,7 +10,13 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
     '/csrf-token': {
       get: {
         summary: 'Generate CSRF token';
-        handler: typeof generateCSRFToken;
+        handler: typeof authController.generateCSRFToken;
+      };
+    };
+    '/login': {
+      post: {
+        summary: 'Login';
+        handler: typeof authController.login;
       };
     };
   };

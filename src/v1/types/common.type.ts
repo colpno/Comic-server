@@ -10,3 +10,7 @@ export interface MongoDocFields {
   updatedAt: string;
 }
 export type MongoDoc<T> = MongoDocFields & T;
+
+export interface JWTPayload {
+  userId: string;
+}
