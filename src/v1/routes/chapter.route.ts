@@ -1,11 +1,11 @@
 import { Router } from 'express';
 
-import { getChapterContent } from '../controllers/chapter.controller';
-import { validateGetChapterContent } from '../validations/chapter.validation';
+import { chapterController } from '../controllers';
+import { chapterValidator } from '../validations';
 
 const router = Router();
 
-router.get('/:id/content', validateGetChapterContent, getChapterContent);
+router.get('/:id/content', chapterValidator.getChapterContent, chapterController.getChapterContent);
 
 const chapterRouter = router;
 export default chapterRouter;
