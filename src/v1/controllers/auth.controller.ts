@@ -1,13 +1,16 @@
 import { RequestHandler } from 'express';
 
-import { Error500 } from '../utils/error.utils';
+import { generateToken } from '../middlewares/csrf.middleware';
+import { SuccessfulResponse } from '../types/api.type';
 
-export const generateCSRFToken: RequestHandler = (req, res) => {
-  if (!req.csrfToken) {
-    throw new Error500('CSRF Token generator is not available');
+export type GenerateCSRFToken = RequestHandler<{}, SuccessfulResponse<string>>;
+
+export const generateCSRFToken: GenerateCSRFToken = (req, res, next) => {
+  try {
+    const csrfToken = generateToken(req, res);
+
+    return res.json({ data: csrfToken });
+  } catch (error) {
+    next(error);
   }
-
-  const csrfToken = req.csrfToken();
-
-  return res.json({ csrfToken });
 };
