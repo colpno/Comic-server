@@ -1,7 +1,6 @@
 import { RequestHandler } from 'express';
 
-import { PAGINATION_PAGE, PAGINATION_PER_PAGE } from '../../constants/global.constant';
-import { BASE_ENDPOINT } from '../configs/common.conf';
+import { BASE_ENDPOINT, PAGINATION_PAGE, PAGINATION_PER_PAGE } from '../constants/common.constant';
 import { GetRequestArgs, SuccessfulResponse } from '../types/api.type';
 import { Comic } from '../types/comic.type';
 import { MangaListQuery, ResponseManga } from '../types/mangadex.type';

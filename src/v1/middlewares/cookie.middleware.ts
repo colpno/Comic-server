@@ -1,8 +1,7 @@
 import cookieParser from 'cookie-parser';
-import { config } from 'dotenv';
 
-config();
+import { COOKIE_SECRET } from '../configs/common.conf';
 
-const middleware = cookieParser(process.env.COOKIE_SECRET);
+const middleware = cookieParser(COOKIE_SECRET);
 
 export default middleware;

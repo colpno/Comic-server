@@ -1,6 +1,6 @@
 import { Tspec } from 'tspec';
 
-import { BASE_ENDPOINT } from '../configs/common.conf';
+import { BASE_ENDPOINT } from '../constants/common.constant';
 import { getComicById, getComicList } from '../controllers/comic.controller';
 
 export type ComicApiSpec = Tspec.DefineApiSpec<{

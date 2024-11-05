@@ -1,6 +1,6 @@
 import { Tspec } from 'tspec';
 
-import { BASE_ENDPOINT } from '../configs/common.conf';
+import { BASE_ENDPOINT } from '../constants/common.constant';
 import { getChapterContent } from '../controllers/chapter.controller';
 
 export type ChapterApiSpec = Tspec.DefineApiSpec<{

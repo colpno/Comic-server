@@ -1,6 +1,6 @@
 import { Tspec } from 'tspec';
 
-import { API_VERSION } from './common.conf';
+import { API_VERSION } from '../constants/common.constant';
 
 const tspecConfig: Tspec.GenerateParams = {
   specPathGlobs: [`src/${API_VERSION}/specs/*.ts`],
@@ -8,7 +8,7 @@ const tspecConfig: Tspec.GenerateParams = {
     title: 'Comic API',
     description:
       'API for comic application. Please visit the api documentation on Github for more information.',
-    version: '1.0.0',
+    version: `${API_VERSION}.0.0`,
   },
 };
 
