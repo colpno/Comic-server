@@ -20,7 +20,7 @@ const MS_15MINS = moment.duration(15, 'minutes').asMilliseconds();
 const MS_1DAY = moment.duration(1, 'day').asMilliseconds();
 const MS_1MONTH = moment.duration(1, 'month').asMilliseconds();
 
-export type GenerateCSRFToken = RequestHandler<{}, SuccessfulResponse<string>>;
+export type GenerateCSRFToken = RequestHandler<{}, Pick<SuccessfulResponse<string>, 'data'>>;
 
 export const generateCSRFToken: GenerateCSRFToken = (req, res, next) => {
   try {
@@ -37,7 +37,7 @@ interface LoginBody {
   password: string;
   forgetMe: boolean;
 }
-export type Login = RequestHandler<{}, SuccessfulResponse, LoginBody>;
+export type Login = RequestHandler<{}, Pick<SuccessfulResponse, 'data'>, LoginBody>;
 
 export const login: Login = async (req, res, next) => {
   try {
