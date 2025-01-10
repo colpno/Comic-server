@@ -8,6 +8,12 @@ import {
   MongoDBUnLogicalOperatorsMap,
 } from '../types/mongoOperators.type';
 
+/* 
+=====================================================
+            Request input validation
+=====================================================
+*/
+
 export const processValidationError = (error: Exclude<ValidationResult['error'], undefined>) => {
   const content: FailedResponse = {
     reason: error.details.map((detail) => ({
@@ -78,3 +84,11 @@ export const validateGetRequest: Record<keyof GetRequestArgs, Schema> = {
   _select: Joi.string(),
   _embed: Joi.alternatives().try(Joi.string(), embedSchema, Joi.array().items(embedSchema)),
 };
+
+/* 
+=====================================================
+                  Mongoose Schema
+=====================================================
+*/
+
+export const arrayMinLength = (limit: number) => (value: unknown[]) => value.length >= limit;
