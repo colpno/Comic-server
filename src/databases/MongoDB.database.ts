@@ -3,7 +3,7 @@ import expressSession from 'express-session';
 import { connect as connectToDB } from 'mongoose';
 
 import { MONGODB_URI } from '../configs/database.conf';
-import cookieConfig from '../v1/configs/cookie.conf';
+import { cookieConfig } from '../v1/configs/cookie.conf';
 
 export class MongoDB {
   async connect() {

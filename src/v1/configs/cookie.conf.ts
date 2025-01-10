@@ -8,12 +8,18 @@ type CookieConfig = Omit<CookieOptions, 'maxAge' | 'httpOnly' | 'sameSite'> & {
   sameSite: Exclude<CookieOptions['sameSite'], undefined>;
 };
 
-const cookieConfig: CookieConfig = {
-  maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+const config: Omit<CookieConfig, 'maxAge'> = {
   httpOnly: true,
   secure: APP_ENVIRONMENT === 'production',
   sameSite: APP_ENVIRONMENT === 'production' ? 'none' : 'lax',
   domain: APP_ENVIRONMENT === 'production' ? COOKIE_DOMAIN : undefined,
+  // overwrite: true,
+  // signed: true,
 };
 
-export default cookieConfig;
+export const cookieConfig: CookieConfig = {
+  ...config,
+  maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+};
+
+export const clearCookieConfig: typeof config = config;
