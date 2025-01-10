@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 
-import { User } from '../types/user.type';
+import { User as OriUser } from '../types/user.type';
+
+type User = Omit<OriUser, 'id'>;
 
 const model = new mongoose.Schema<User>({
   email: { type: String, required: true, unique: true },
@@ -8,8 +10,9 @@ const model = new mongoose.Schema<User>({
     hashed: { type: String, required: true },
     salt: { type: String, required: true },
   },
+  refreshToken: { type: String },
 });
 
-const UserModel = mongoose.model('users', model);
+const UserModel = mongoose.model<User>('users', model);
 
 export default UserModel;
