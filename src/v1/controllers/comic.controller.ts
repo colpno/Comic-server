@@ -11,13 +11,13 @@ import { getMangaById, getMangaList, getTagIdList } from './mangadex.controller'
 type MangaRelationship = ResponseManga['relationships'][number]['type'];
 
 type GetComicsQuery = Omit<
-  GetRequestArgs & Omit<MangaListQuery, 'limit' | 'offset' | 'order'>,
+  GetRequestArgs & Omit<MangaListQuery, 'limit' | 'offset' | 'order' | 'includes'>,
   '_select' | '_embed'
 > & {
   /**
    * Available values: cover_art, manga, author, artist, tag
    */
-  _embed?: MangaRelationship | { path: MangaRelationship } | { path: MangaRelationship }[];
+  _embed?: MangaRelationship | MangaRelationship[];
 };
 export type GetComics = RequestHandler<{}, SuccessfulResponse<Comic[]>, null, GetComicsQuery>;
 
@@ -67,7 +67,7 @@ type GetComicByIdQuery = {
   /**
    * Available values: cover_art, manga, author, artist, tag
    */
-  _embed?: MangaRelationship | { path: MangaRelationship } | { path: MangaRelationship }[];
+  _embed?: MangaRelationship | MangaRelationship[];
 };
 export type GetComicById = RequestHandler<
   { id: string },

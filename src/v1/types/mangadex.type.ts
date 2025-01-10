@@ -214,6 +214,10 @@ export interface ChapterImages {
 
 export interface MangaListQuery {
   /**
+   * Manga ids. Limit to 100 ids.
+   */
+  ids?: string[];
+  /**
    * Manga type.
    * @example
    * 'manga'

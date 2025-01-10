@@ -3,17 +3,10 @@ import { ResponseManga } from '../types/mangadex.type';
 type MangaRelationship = ResponseManga['relationships'][number]['type'];
 
 export const toMangaDexEmbedValue = (
-  embed?: MangaRelationship | { path: MangaRelationship } | { path: MangaRelationship }[]
+  embed?: MangaRelationship | MangaRelationship[]
 ): MangaRelationship[] | undefined => {
-  if (!embed) {
-    return undefined;
-  }
-
-  if (Array.isArray(embed)) {
-    return embed.map((e) => (typeof e === 'object' ? e.path : e));
-  }
-
-  return typeof embed === 'object' ? [embed.path] : [embed];
+  if (!embed) return undefined;
+  return Array.isArray(embed) ? embed : [embed];
 };
 
 export const calculateOffset = (limit?: number, page?: number): number | undefined => {
