@@ -2,7 +2,7 @@ import qs from 'qs';
 import request from 'supertest';
 
 import app from '../../app';
-import { COOKIE_NAME_REFRESH_TOKEN } from '../configs/common.conf';
+import { COOKIE_NAME_ACCESS_TOKEN, COOKIE_NAME_REFRESH_TOKEN } from '../configs/common.conf';
 import { BASE_ENDPOINT } from '../constants/common.constant';
 import { SuccessfulResponse } from '../types/api.type';
 import { serializeObject } from '../utils/console.util';
@@ -10,7 +10,17 @@ import { Error500 } from '../utils/error.utils';
 
 export const stringifyQuery = (obj: Record<string, unknown>) => qs.stringify(obj);
 
-export const login = async () => {
+interface Credentials {
+  email: string;
+  password: string;
+}
+
+const defaultCredentials: Credentials = {
+  email: 'john@gmail.com',
+  password: '12345678901234567',
+};
+
+export const login = async (credentials: Credentials = defaultCredentials) => {
   try {
     //  Retrieve CSRF token
     const getCsrfRoute = `${BASE_ENDPOINT}/auth/csrf-token`;
@@ -36,20 +46,29 @@ export const login = async () => {
       .post(loginRoute)
       .set('Cookie', csrfTokenCookie)
       .set('X-CSRF-Token', csrfToken)
-      .send({ username: 'admin', password: 'admin' });
+      .send(credentials);
 
-    const { data: accessToken } = loginResponse.body as SuccessfulResponse<string | undefined>;
     const cookies = loginResponse.headers['set-cookie'] as unknown as string[] | undefined;
-    const refreshToken = cookies?.find((cookie) => cookie.includes(COOKIE_NAME_REFRESH_TOKEN));
+    const accessTokenCookie = cookies?.find((cookie) => cookie.includes(COOKIE_NAME_ACCESS_TOKEN));
+    const refreshTokenCookie = cookies?.find((cookie) =>
+      cookie.includes(COOKIE_NAME_REFRESH_TOKEN)
+    );
 
-    if (!accessToken) {
-      throw new Error500('No access token is returned in body');
+    if (!accessTokenCookie) {
+      throw new Error500('No access token is set in cookie');
     }
-    if (!refreshToken) {
+    if (!refreshTokenCookie) {
       throw new Error500('No refresh token is set in cookie');
     }
 
-    return { csrfToken, accessToken, refreshToken };
+    return {
+      csrfToken,
+      csrfTokenCookie,
+      accessTokenCookie,
+      refreshTokenCookie,
+      /** Contains access token and refresh token. */
+      authCookies: [accessTokenCookie, refreshTokenCookie],
+    };
   } catch (error) {
     console.error(serializeObject(error));
     throw error;

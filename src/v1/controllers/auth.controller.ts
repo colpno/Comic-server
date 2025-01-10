@@ -5,15 +5,16 @@ import moment from 'moment';
 import { HTTP_204_NO_CONTENT } from '../../constants/httpCode.constant';
 import {
   ACCESS_TOKEN_SECRET,
+  COOKIE_NAME_ACCESS_TOKEN,
   COOKIE_NAME_REFRESH_TOKEN,
   REFRESH_TOKEN_SECRET,
 } from '../configs/common.conf';
-import cookieConfig from '../configs/cookie.conf';
-import { generateToken } from '../middlewares/csrf.middleware';
-import { getUser } from '../services/user.service';
+import { clearCookieConfig, cookieConfig } from '../configs/cookie.conf';
+import { createUser, getUser, updateUser } from '../services/user.service';
 import { SuccessfulResponse } from '../types/api.type';
 import { JWTPayload } from '../types/common.type';
-import { hashString } from '../utils/crypto';
+import { User } from '../types/user.type';
+import { generateSalt, hashString } from '../utils/crypto';
 import { Error400, Error403, Error404 } from '../utils/error.utils';
 
 const MS_15MINS = moment.duration(15, 'minutes').asMilliseconds();
@@ -24,9 +25,7 @@ export type GenerateCSRFToken = RequestHandler<{}, Pick<SuccessfulResponse<strin
 
 export const generateCSRFToken: GenerateCSRFToken = (req, res, next) => {
   try {
-    const csrfToken = generateToken(req, res);
-
-    return res.json({ data: csrfToken });
+    return res.json({ data: req.csrfToken() });
   } catch (error) {
     next(error);
   }
@@ -35,20 +34,22 @@ export const generateCSRFToken: GenerateCSRFToken = (req, res, next) => {
 interface LoginBody {
   email: string;
   password: string;
-  forgetMe: boolean;
+  rememberMe?: boolean;
 }
-export type Login = RequestHandler<{}, Pick<SuccessfulResponse, 'data'>, LoginBody>;
+export type Login = RequestHandler<{}, unknown, LoginBody>;
 
 export const login: Login = async (req, res, next) => {
   try {
-    const { email, password, forgetMe } = req.body;
-    const hashedPassword = hashString(password, 'salt').hashedValue;
+    const { email, password, rememberMe } = req.body;
 
+    // Check if the user is already registered
     const user = await getUser({ email });
-
     if (!user) {
-      throw new Error404(`${email} is not registered`);
+      throw new Error400(`${email} is not registered`);
     }
+
+    // Compare passwords
+    const hashedPassword = hashString(password, user.password.salt).hashedValue;
     if (user.password.hashed !== hashedPassword) {
       throw new Error400('Password is incorrect');
     }
@@ -59,36 +60,125 @@ export const login: Login = async (req, res, next) => {
     };
     const accessToken = jwt.sign(jwtPayload, ACCESS_TOKEN_SECRET, { expiresIn: MS_15MINS });
     const refreshToken = jwt.sign(jwtPayload, REFRESH_TOKEN_SECRET, {
-      expiresIn: forgetMe ? MS_1DAY : MS_1MONTH,
+      expiresIn: rememberMe ? MS_1DAY : MS_1MONTH,
     });
 
     res.cookie(COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookieConfig);
-    return res.json({ data: accessToken });
+    res.cookie(COOKIE_NAME_ACCESS_TOKEN, accessToken, cookieConfig);
+    return res.sendStatus(HTTP_204_NO_CONTENT);
   } catch (error) {
     next(error);
   }
 };
 
 export const logout: RequestHandler = async (req, res, next) => {
-  try {
-    const refreshToken = req.cookies?.[COOKIE_NAME_REFRESH_TOKEN];
+  const clearCookies = () => {
+    res.clearCookie(COOKIE_NAME_REFRESH_TOKEN, clearCookieConfig);
+    res.clearCookie(COOKIE_NAME_ACCESS_TOKEN, clearCookieConfig);
+  };
 
-    // No refresh token in the cookie
+  try {
+    // Check the existence of the refresh token
+    const refreshToken = req.cookies?.[COOKIE_NAME_REFRESH_TOKEN];
     if (!refreshToken) {
       return res.sendStatus(HTTP_204_NO_CONTENT);
     }
 
+    // Get user
     const userWithRefreshToken = await getUser({ refreshToken });
 
-    // User without the refresh token
+    // No user with the refresh token
     if (!userWithRefreshToken) {
-      res.clearCookie(COOKIE_NAME_REFRESH_TOKEN);
+      clearCookies();
       return res.sendStatus(HTTP_204_NO_CONTENT);
     }
 
-    // User with the refresh token: clear the refresh token
-    // await updateUser({ _id: userWithRefreshToken._id }, { refreshToken: '' });
-    res.clearCookie(COOKIE_NAME_REFRESH_TOKEN);
+    // Remove refresh token
+    await updateUser({ _id: userWithRefreshToken._id }, { refreshToken: '' });
+    clearCookies();
+
+    return res.sendStatus(HTTP_204_NO_CONTENT);
+  } catch (error) {
+    next(error);
+  }
+};
+
+interface RegisterBody {
+  email: string;
+  password: string;
+  passwordVerification: string;
+}
+export type Register = RequestHandler<{}, unknown, RegisterBody>;
+
+export const register: Register = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check if the user already exists
+    const existingUser = await getUser({ email });
+    if (existingUser) {
+      throw new Error400('Email already exists');
+    }
+
+    // Hash the password
+    const salt = generateSalt();
+    const hashedPassword = hashString(password, salt).hashedValue;
+
+    // Create the new user
+    const newUser: Parameters<typeof createUser>[0] = {
+      email,
+      password: {
+        hashed: hashedPassword,
+        salt,
+      },
+    };
+    await createUser(newUser);
+
+    return res.sendStatus(HTTP_204_NO_CONTENT);
+  } catch (error) {
+    next(error);
+  }
+};
+
+interface ResetPasswordBody {
+  email: string;
+  password: string;
+  passwordVerification: string;
+}
+export type ResetPassword = RequestHandler<{}, unknown, ResetPasswordBody>;
+
+export const resetPassword: ResetPassword = async (req, res, next) => {
+  try {
+    const { email, password, passwordVerification } = req.body;
+
+    // Check the existence of the user
+    const existingUser = await getUser({ email });
+    if (!existingUser) {
+      throw new Error400('No user that has the email');
+    }
+
+    // Compare passwords
+    if (password !== passwordVerification) {
+      throw new Error400('Password and password verification do not match');
+    }
+
+    // Hash the password
+    const salt = generateSalt();
+    const hashedPassword = hashString(password, salt).hashedValue;
+
+    // Update the user
+    const neededUpdate: Partial<User> = {
+      password: {
+        hashed: hashedPassword,
+        salt,
+      },
+    };
+    const result = await updateUser({ email }, neededUpdate);
+
+    // No user is updated
+    if (!result) {
+      throw new Error400('Failed to update the password');
+    }
 
     return res.sendStatus(HTTP_204_NO_CONTENT);
   } catch (error) {
@@ -105,16 +195,16 @@ export const refreshAccessToken: RequestHandler = async (req, res, next) => {
       throw new Error403();
     }
 
-    // Find the user with the refresh token
+    // Check the existence of the user
     const user = await getUser({ refreshToken });
-
     if (!user) {
       throw new Error404('User not found');
     }
 
+    // Verify the refresh token
     jwt.verify(refreshToken, REFRESH_TOKEN_SECRET, (err: unknown, decoded: unknown) => {
       if (err) {
-        throw new Error403('Invalid Refresh Token');
+        throw new Error403('Invalid refresh token');
       }
 
       // Create a new access token
