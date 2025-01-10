@@ -1,18 +1,16 @@
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 
-import { ACCESS_TOKEN_SECRET } from '../configs/common.conf';
+import { ACCESS_TOKEN_SECRET, COOKIE_NAME_ACCESS_TOKEN } from '../configs/common.conf';
 import { JWTPayload } from '../types/common.type';
 import { Error401, Error403 } from '../utils/error.utils';
 
 const isAuthenticated: RequestHandler = (req, _, next) => {
-  const authHeader = req.headers['authorization'] as string | undefined;
+  const accessToken = req.cookies?.[COOKIE_NAME_ACCESS_TOKEN];
 
-  if (!authHeader) {
-    throw new Error401('Authorization header is missing');
+  if (!accessToken) {
+    throw new Error401('Login is required');
   }
-
-  const accessToken = authHeader.split(' ')[1];
 
   jwt.verify(accessToken, ACCESS_TOKEN_SECRET, (err: unknown, decoded: unknown) => {
     if (err) {
