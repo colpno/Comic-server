@@ -5,7 +5,7 @@ import { ACCESS_TOKEN_SECRET } from '../configs/common.conf';
 import { JWTPayload } from '../types/common.type';
 import { Error401, Error403 } from '../utils/error.utils';
 
-const verifyAccessToken: RequestHandler = (req, _, next) => {
+const isAuthenticated: RequestHandler = (req, _, next) => {
   const authHeader = req.headers['authorization'] as string | undefined;
 
   if (!authHeader) {
@@ -26,4 +26,4 @@ const verifyAccessToken: RequestHandler = (req, _, next) => {
   });
 };
 
-export default verifyAccessToken;
+export default isAuthenticated;
