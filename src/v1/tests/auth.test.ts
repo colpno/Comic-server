@@ -76,7 +76,7 @@ describe('Auth', () => {
       const credential = {
         email: 'john@gmail.com',
         password: 'johnajsodiasjdaisodjas',
-        forgetMe: false,
+        rememberMe: false,
       };
 
       const response = await request(app)
@@ -99,7 +99,7 @@ describe('Auth', () => {
       const credential = {
         email: 'john@gmail.com',
         password: 'johnjohnjohnjohnjohn',
-        forgetMe: false,
+        rememberMe: false,
       };
 
       const response = await request(app)
@@ -125,6 +125,38 @@ describe('Auth', () => {
 
       accessToken = responseAccessToken;
       refreshToken = refreshTokenCookie;
+    });
+  });
+
+  describe('Register', () => {
+    it('should return 403 when accessing /register without a csrf token', async () => {
+      const endpoint = getEndpoint({ extends: '/register' });
+
+      const response = await request(app).post(endpoint);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('Should return 400 when accessing /register with invalid input', async () => {
+      if (!(csrfToken && csrfTokenCookie)) {
+        throw new Error('csrfToken and cookie are not set');
+      }
+
+      const endpoint = getEndpoint({ extends: '/register' });
+      const credential = {
+        email: 'john@gmail.com',
+        password: 'johnajsodiasjdaisodjas',
+      };
+
+      const response = await request(app)
+        .post(endpoint)
+        .set('Cookie', csrfTokenCookie)
+        .set('X-CSRF-Token', csrfToken)
+        .send(credential);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('reason');
+      expect(/password/i.test(response.body.reason)).toBe(true);
     });
   });
 
