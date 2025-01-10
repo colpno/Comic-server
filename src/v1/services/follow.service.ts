@@ -1,6 +1,6 @@
 import { FilterQuery } from 'mongoose';
 
-import FollowModel from '../models/follow.model';
+import { FollowModel } from '../models';
 import { Follow } from '../types/follow.type';
 import Pipeline from '../utils/Pipeline.util';
 

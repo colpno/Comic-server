@@ -1,6 +1,6 @@
 import { FilterQuery } from 'mongoose';
 
-import UserModel from '../models/user.model';
+import { UserModel } from '../models';
 import { User } from '../types/user.type';
 
 export const getUser = async (filter: FilterQuery<User>) => {
