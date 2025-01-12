@@ -17,8 +17,7 @@ const isAuthenticated: RequestHandler = (req, _, next) => {
       throw new Error403('Invalid Access Token');
     }
 
-    const payload = decoded as JWTPayload | undefined;
-    req.user = payload;
+    req.user = decoded as JWTPayload;
 
     next();
   });
