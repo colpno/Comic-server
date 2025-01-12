@@ -3,28 +3,11 @@ import request from 'supertest';
 
 import app from '../../app';
 import { COOKIE_NAME_CSRF_TOKEN, COOKIE_NAME_REFRESH_TOKEN } from '../configs/common.conf';
-import { BASE_ENDPOINT } from '../constants/common.constant';
 import { SuccessfulResponse } from '../types/api.type';
-import { stringifyQuery } from './';
+import { createEndpoint, CreateEndpointArgs } from './';
 
-type GetEndpointArgs = {
-  /**
-   * A string to append to the URL.
-   */
-  extends?: string;
-  /**
-   * An object of query parameters.
-   */
-  query?: Record<string, unknown>;
-};
-
-/**
- * Retrieve auth endpoint.
- */
-const getEndpoint = (args?: GetEndpointArgs) => {
-  const queryStr = args?.query ? `?${stringifyQuery(args.query)}` : '';
-  const extension = args?.extends || '';
-  return `${BASE_ENDPOINT}/auth${extension}${queryStr}`;
+const getEndpoint = (args?: Omit<CreateEndpointArgs, 'baseEndpoint'>) => {
+  return createEndpoint({ ...args, baseEndpoint: 'auth' });
 };
 
 afterAll((done) => {

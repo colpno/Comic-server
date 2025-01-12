@@ -10,6 +10,25 @@ import { Error500 } from '../utils/error.utils';
 
 export const stringifyQuery = (obj: Record<string, unknown>) => qs.stringify(obj);
 
+export type CreateEndpointArgs = {
+  /**
+   * A string to append to the URL.
+   */
+  extends?: string;
+  /**
+   * An object of query parameters.
+   */
+  query?: Record<string, unknown>;
+  baseEndpoint: string;
+};
+
+export const createEndpoint = (args?: CreateEndpointArgs) => {
+  const queryStr = args?.query ? `?${stringifyQuery(args.query)}` : '';
+  const extension = args?.extends || '';
+  const baseEndpoint = args?.baseEndpoint || '';
+  return `${BASE_ENDPOINT}/${baseEndpoint}${extension}${queryStr}`;
+};
+
 interface Credentials {
   email: string;
   password: string;

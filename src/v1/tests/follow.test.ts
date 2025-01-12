@@ -2,28 +2,11 @@ import mongoose from 'mongoose';
 import request from 'supertest';
 
 import app from '../../app';
-import { BASE_ENDPOINT } from '../constants/common.constant';
 import { AddFollowBody } from '../controllers/follow.controller';
-import { login, stringifyQuery } from './';
+import { createEndpoint, CreateEndpointArgs, login } from './';
 
-type GetEndpointArgs = {
-  /**
-   * A string to append to the URL.
-   */
-  extends?: string;
-  /**
-   * An object of query parameters.
-   */
-  query?: Record<string, unknown>;
-};
-
-/**
- * Retrieve follows endpoint.
- */
-const getEndpoint = (args?: GetEndpointArgs) => {
-  const queryStr = args?.query ? `?${stringifyQuery(args.query)}` : '';
-  const extension = args?.extends || '';
-  return `${BASE_ENDPOINT}/follows${extension}${queryStr}`;
+const getEndpoint = (args?: Omit<CreateEndpointArgs, 'baseEndpoint'>) => {
+  return createEndpoint({ ...args, baseEndpoint: 'follows' });
 };
 
 afterAll((done) => {
