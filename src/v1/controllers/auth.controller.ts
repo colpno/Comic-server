@@ -1,6 +1,5 @@
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import moment from 'moment';
 
 import { HTTP_204_NO_CONTENT } from '../../constants/httpCode.constant';
 import {
@@ -14,12 +13,13 @@ import { createUser, getUser, updateUser } from '../services/user.service';
 import { SuccessfulResponse } from '../types/api.type';
 import { JWTPayload } from '../types/common.type';
 import { User } from '../types/user.type';
+import { toMS } from '../utils/converter.util';
 import { generateSalt, hashString } from '../utils/crypto';
 import { Error400, Error403, Error404 } from '../utils/error.utils';
 
-const MS_15MINS = moment.duration(15, 'minutes').asMilliseconds();
-const MS_1DAY = moment.duration(1, 'day').asMilliseconds();
-const MS_1MONTH = moment.duration(1, 'month').asMilliseconds();
+const MS_15MINS = toMS(15, 'minutes');
+const MS_1DAY = toMS(1, 'day');
+const MS_1MONTH = toMS(1, 'month');
 
 export type GenerateCSRFToken = RequestHandler<{}, Pick<SuccessfulResponse<string>, 'data'>>;
 
