@@ -236,6 +236,7 @@ export interface MangaListQuery {
   updatedAt?: string;
   hasAvailableChapters?: string;
   includedTags?: string[];
+  includedTagsMode?: 'AND' | 'OR';
   /**
    * Relationships to include.
    * @example
