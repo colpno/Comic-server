@@ -5,6 +5,7 @@ import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
 import { GetComicById, GetComics } from '../controllers/comic.controller';
 import { Comic } from '../types/comic.type';
+import { MangaListQuery } from '../types/mangadex.type';
 import { processValidationError, validateGetRequest } from '../utils/validation.util';
 
 type GetComicListSchema = Record<keyof Parameters<GetComics>[0]['query'], Schema>;
@@ -13,7 +14,8 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
   const { _select, _embed, _sort, ...commands } = validateGetRequest;
   const allowedTypes: Comic['type'][] = ['manga', 'manhwa', 'manhua'];
   const allowedStatuses: Comic['status'][] = ['ongoing', 'completed', 'hiatus', 'cancelled'];
-  const allowedContentRatings: Comic['contentRating'][] = ['suggestive'];
+  const allowedContentRatings: Comic['contentRating'][] = ['safe', 'suggestive'];
+  const allowedTagMode: MangaListQuery['includedTagsMode'][] = ['AND', 'OR'];
   const allowedEmbeds = ['author', 'artist', 'manga', 'cover_art', 'tag', 'creator'];
   const allowedSorts = [
     'title',
@@ -58,6 +60,7 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
     createdAt: Joi.string().isoDate(),
     updatedAt: Joi.string().isoDate(),
     hasAvailableChapters: Joi.string().valid('true', 'false'),
+    includedTagsMode: Joi.string().valid(...allowedTagMode),
   });
 
   const { error, value } = schema.validate(req.query, options);

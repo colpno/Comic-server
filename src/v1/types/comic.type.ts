@@ -6,7 +6,7 @@ import { Manga } from './mangadex.type';
 type Status = Extract<Manga['status'], 'ongoing' | 'completed' | 'hiatus' | 'cancelled'>;
 type State = Extract<Manga['state'], 'published'> | 'draft';
 type Type = 'manga' | 'manhwa' | 'manhua';
-type ContentRating = 'suggestive';
+type ContentRating = 'safe' | 'suggestive';
 type TagGroup = 'theme' | 'genre' | 'format';
 
 interface Tag {
