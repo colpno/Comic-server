@@ -11,13 +11,17 @@ import {
   Response as MangaDexResponse,
 } from '../types/mangadex.type';
 
-const MANGADEX_API_URL = 'https://api.mangadex.org';
+const BASE_URL = 'https://api.mangadex.org' as const;
+const MANGA_URL = `${BASE_URL}/manga` as const;
+const TAG_URL = `${MANGA_URL}/tag` as const;
+const getSpecificMangaUrl = (mangaId: string) => `${BASE_URL}/manga/${mangaId}` as const;
+const getMangaChaptersUrl = (mangaId: string) => `${BASE_URL}/manga/${mangaId}/feed` as const;
+const getChapterImagesUrl = (chapterId: string) =>
+  `${BASE_URL}/at-home/server/${chapterId}` as const;
 
 export const getTagIdList = async (tagNames: string[]) => {
   try {
-    const tags = await axios<MangaDexResponse<'collection', 'tag'>>(
-      `${MANGADEX_API_URL}/manga/tag`
-    );
+    const tags = await axios<MangaDexResponse<'collection', 'tag'>>(TAG_URL);
 
     const tagIds = tags.data.data
       .filter((tag) => tagNames.includes(tag.attributes.name.en))
@@ -32,9 +36,8 @@ export const getTagIdList = async (tagNames: string[]) => {
 export const getMangaList = async (query: MangaListQuery) => {
   try {
     const filters = query;
-    const url = `${MANGADEX_API_URL}/manga`;
 
-    const response = await axios.get<MangaDexResponse<'collection', 'manga'>>(url, {
+    const response = await axios.get<MangaDexResponse<'collection', 'manga'>>(MANGA_URL, {
       params: filters,
     });
     const { data } = response;
@@ -59,7 +62,7 @@ export const getMangaList = async (query: MangaListQuery) => {
 
 export const getMangaById = async (mangaId: string, query: MangaByIdQuery) => {
   try {
-    const url = `${MANGADEX_API_URL}/manga/${mangaId}`;
+    const url = getSpecificMangaUrl(mangaId);
 
     const response = await axios.get<MangaDexResponse<'entity', 'manga'>>(url, {
       params: query,
@@ -76,7 +79,7 @@ export const getMangaById = async (mangaId: string, query: MangaByIdQuery) => {
 export const getChaptersByMangaId = async (mangaId: string, query: MangaFeedQuery) => {
   try {
     const { limit, offset, order, include: includes, exclude: excludes } = query;
-    const url = `${MANGADEX_API_URL}/manga/${mangaId}/feed`;
+    const url = getMangaChaptersUrl(mangaId);
 
     const includeParam = includes?.reduce((acc, include) => {
       acc[`include${include[0].toUpperCase()}${include.slice(1)}`] = 1;
@@ -109,7 +112,7 @@ export const getChaptersByMangaId = async (mangaId: string, query: MangaFeedQuer
 };
 
 export const getChapterContent = async (chapterId: Chapter['id']) => {
-  const url = `${MANGADEX_API_URL}/at-home/server/${chapterId}`;
+  const url = getChapterImagesUrl(chapterId);
 
   const response = await axios.get<ChapterImages>(url);
   const { data } = response;
