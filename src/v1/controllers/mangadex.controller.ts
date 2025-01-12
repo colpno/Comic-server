@@ -19,6 +19,20 @@ const getMangaChaptersUrl = (mangaId: string) => `${BASE_URL}/manga/${mangaId}/f
 const getChapterImagesUrl = (chapterId: string) =>
   `${BASE_URL}/at-home/server/${chapterId}` as const;
 
+export const getTagList = async () => {
+  try {
+    const { data } = await axios<MangaDexResponse<'collection', 'tag'>>(TAG_URL);
+
+    // Remove illegal tags
+    const illegalTags = ['Incest', 'Sexual Violence'];
+    const tags = data.data.filter((tag) => !illegalTags.includes(tag.attributes.name.en));
+
+    return tags;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getTagIdList = async (tagNames: string[]) => {
   try {
     const tags = await axios<MangaDexResponse<'collection', 'tag'>>(TAG_URL);
@@ -38,7 +52,10 @@ export const getMangaList = async (query: MangaListQuery) => {
     const filters = query;
 
     const response = await axios.get<MangaDexResponse<'collection', 'manga'>>(MANGA_URL, {
-      params: filters,
+      params: {
+        contentRating: ['safe', 'suggestive'],
+        ...filters,
+      },
     });
     const { data } = response;
 
