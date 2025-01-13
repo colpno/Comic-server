@@ -1,6 +1,5 @@
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import { Types } from 'mongoose';
 
 import { HTTP_200_OK, HTTP_201_CREATED } from '../../constants/httpCode.constant';
 import { ACCESS_TOKEN_SECRET, COOKIE_NAME_ACCESS_TOKEN } from '../configs/common.conf';
@@ -72,23 +71,21 @@ export type AddFollow = RequestHandler<{}, unknown, AddFollowBody>;
 
 export const addFollow: AddFollow = async (req, res, next) => {
   try {
-    const { body } = req;
+    const { follower, following } = req.body;
 
     // Check if the user already follows the target
-    const existingFollows = await followService.getFollows({
-      follower: new Types.ObjectId(body.follower),
-    });
+    const existingFollows = await followService.getFollows({ follower });
 
     // The user has follows => Add
     if (existingFollows.length > 0) {
-      await followService.addFollow({ follower: body.follower }, body.following);
+      await followService.addFollow({ follower }, following);
       return res.sendStatus(HTTP_200_OK);
     }
 
     // Create
     await followService.createFollow({
-      follower: body.follower,
-      following: [body.following],
+      follower,
+      following: [following],
     });
     return res.sendStatus(HTTP_201_CREATED);
   } catch (error) {
