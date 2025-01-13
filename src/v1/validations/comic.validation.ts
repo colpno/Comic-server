@@ -89,7 +89,13 @@ type GetComicByIdSchema = {
 };
 
 export const getComicById = (req: Request, res: Response, next: NextFunction) => {
-  const allowedEmbeds = ['author', 'artist', 'manga', 'cover_art', 'tag', 'creator'];
+  const allowedEmbeds: MangaListQuery['includes'] = [
+    'author',
+    'artist',
+    'manga',
+    'cover_art',
+    'tag',
+  ];
 
   const options: ValidationOptions = {
     stripUnknown: true,
