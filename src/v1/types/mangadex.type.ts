@@ -1,4 +1,4 @@
-import { GetRequestArgs } from './api.type';
+import { GetRequestArgs, Sort } from './api.type';
 import { LanguageCode } from './languageCode.type';
 
 /* 
@@ -211,6 +211,7 @@ export interface ChapterImages {
   Query parameters
 ==============================================================================
 */
+export interface MangaListQuerySort {}
 
 export interface MangaListQuery {
   /**
@@ -260,7 +261,17 @@ export interface MangaListQuery {
    * @example
    * { createdAt: 'desc' }
    */
-  order?: GetRequestArgs['_sort'];
+  order?: Sort<{
+    title?: unknown;
+    year?: unknown;
+    createdAt?: unknown;
+    updatedAt?: unknown;
+    readableAt?: unknown;
+    latestUploadedChapter?: unknown;
+    followedCount?: unknown;
+    relevance?: unknown;
+    rating?: unknown;
+  }>;
 }
 
 export interface MangaByIdQuery {

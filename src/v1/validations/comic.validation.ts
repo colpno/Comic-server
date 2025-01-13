@@ -16,12 +16,19 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
   const allowedStatuses: Comic['status'][] = ['ongoing', 'completed', 'hiatus', 'cancelled'];
   const allowedContentRatings: Comic['contentRating'][] = ['safe', 'suggestive'];
   const allowedTagMode: MangaListQuery['includedTagsMode'][] = ['AND', 'OR'];
-  const allowedEmbeds = ['author', 'artist', 'manga', 'cover_art', 'tag', 'creator'];
-  const allowedSorts = [
+  const allowedEmbeds: MangaListQuery['includes'] = [
+    'author',
+    'artist',
+    'manga',
+    'cover_art',
+    'tag',
+  ];
+  const allowedSorts: (keyof Exclude<MangaListQuery['order'], undefined>)[] = [
     'title',
     'year',
     'createdAt',
     'updatedAt',
+    'readableAt',
     'latestUploadedChapter',
     'followedCount',
     'relevance',
