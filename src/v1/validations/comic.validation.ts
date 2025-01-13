@@ -62,7 +62,7 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
     ),
     type: Joi.string().valid(...allowedTypes),
     title: Joi.string(),
-    status: Joi.string().valid(...allowedStatuses),
+    status: Joi.array().items(Joi.string().valid(...allowedStatuses)),
     year: Joi.number().integer().positive().greater(1900).less(2100),
     contentRating: Joi.string().valid(...allowedContentRatings),
     createdAt: Joi.string().isoDate(),

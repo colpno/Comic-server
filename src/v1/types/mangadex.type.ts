@@ -225,7 +225,7 @@ export interface MangaListQuery {
    */
   type?: string;
   title?: string;
-  status?: MangaStatus;
+  status?: MangaStatus[];
   /**
    * Release year.
    * @example
