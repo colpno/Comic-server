@@ -38,7 +38,11 @@ export const getTagIdList = async (tagNames: string[]) => {
     const tags = await axios<MangaDexResponse<'collection', 'tag'>>(TAG_URL);
 
     const tagIds = tags.data.data
-      .filter((tag) => tagNames.includes(tag.attributes.name.en))
+      .filter((tag) =>
+        tagNames
+          .map((tagName) => tagName.toLowerCase())
+          .includes(tag.attributes.name.en.toLowerCase())
+      )
       .map((tag) => tag.id);
 
     return tagIds;
