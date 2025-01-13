@@ -266,7 +266,6 @@ export interface MangaListQuery {
     year?: unknown;
     createdAt?: unknown;
     updatedAt?: unknown;
-    readableAt?: unknown;
     latestUploadedChapter?: unknown;
     followedCount?: unknown;
     relevance?: unknown;

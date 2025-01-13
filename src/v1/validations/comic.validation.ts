@@ -28,7 +28,6 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
     'year',
     'createdAt',
     'updatedAt',
-    'readableAt',
     'latestUploadedChapter',
     'followedCount',
     'relevance',
