@@ -32,6 +32,7 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
     'latestUploadedChapter',
     'followedCount',
     'relevance',
+    'rating',
   ];
 
   const options: ValidationOptions = {
