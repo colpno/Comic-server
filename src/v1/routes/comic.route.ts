@@ -1,10 +1,15 @@
-import { Router } from 'express';
+import { RequestHandler, Router } from 'express';
 
 import { chapterController, comicController } from '../controllers';
 import { chapterValidator, comicValidator } from '../validations';
 
 const router = Router();
 
+router.get(
+  '/search',
+  comicValidator.searchComics,
+  comicController.searchComics as unknown as RequestHandler
+);
 router.get(
   '/:id/chapters',
   chapterValidator.getChaptersByComicId,

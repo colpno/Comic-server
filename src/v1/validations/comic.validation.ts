@@ -3,7 +3,7 @@ import { Schema, ValidationOptions } from 'joi';
 
 import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
-import { GetComicById, GetComics } from '../controllers/comic.controller';
+import { GetComicById, GetComics, SearchComics } from '../controllers/comic.controller';
 import { Comic } from '../types/comic.type';
 import { MangaListQuery } from '../types/mangadex.type';
 import { processValidationError, validateGetRequest } from '../utils/validation.util';
@@ -121,6 +121,68 @@ export const getComicById = (req: Request, res: Response, next: NextFunction) =>
   req.originalQuery = req.query;
   req.query = queryValue;
   req.params = paramValue;
+
+  next();
+};
+
+type SearchComicsSchema = Record<keyof Parameters<SearchComics>[0]['query'], Schema>;
+
+export const searchComics = (req: Request, res: Response, next: NextFunction) => {
+  const { _select, _embed, _sort, ...commands } = validateGetRequest;
+  const allowedEmbeds: MangaListQuery['includes'] = [
+    'author',
+    'artist',
+    'manga',
+    'cover_art',
+    'tag',
+  ];
+  const allowedSorts: (keyof Exclude<MangaListQuery['order'], undefined>)[] = [
+    'title',
+    'year',
+    'createdAt',
+    'updatedAt',
+    'latestUploadedChapter',
+    'followedCount',
+    'relevance',
+    'rating',
+  ];
+
+  const options: ValidationOptions = {
+    stripUnknown: true,
+  };
+
+  const schema = Joi.object<SearchComicsSchema>({
+    ...commands,
+    _sort: Joi.object().pattern(
+      Joi.string().valid(...allowedSorts),
+      Joi.string().valid('asc', 'desc')
+    ),
+    _embed: Joi.alternatives().try(
+      Joi.string().valid(...allowedEmbeds),
+      Joi.object({
+        path: Joi.string()
+          .valid(...allowedEmbeds)
+          .required(),
+      }),
+      Joi.array().items(
+        Joi.object({
+          path: Joi.string()
+            .valid(...allowedEmbeds)
+            .required(),
+        })
+      )
+    ),
+    q: Joi.string().required(),
+  });
+
+  const { error, value } = schema.validate(req.query, options);
+
+  if (error) {
+    return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));
+  }
+
+  req.originalQuery = req.query;
+  req.query = value;
 
   next();
 };

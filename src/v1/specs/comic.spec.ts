@@ -1,7 +1,7 @@
 import { Tspec } from 'tspec';
 
 import { BASE_ENDPOINT } from '../constants/common.constant';
-import { getComicById, getComicList } from '../controllers/comic.controller';
+import { getComicById, getComicList, searchComics } from '../controllers/comic.controller';
 
 export type ComicApiSpec = Tspec.DefineApiSpec<{
   basePath: `${typeof BASE_ENDPOINT}/comics`;
@@ -23,6 +23,12 @@ export type ComicApiSpec = Tspec.DefineApiSpec<{
       get: {
         summary: 'Get a list of chapters of a specific comic';
         handler: typeof getComicById;
+      };
+    };
+    '/search': {
+      get: {
+        summary: 'Search for comics';
+        handler: typeof searchComics;
       };
     };
   };
