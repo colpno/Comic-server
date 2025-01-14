@@ -99,19 +99,19 @@ export type Embed<DataType = Record<string, unknown>> = {
    * @example
    * 'field'
    */
-  path: string;
+  path: keyof DataType;
   /**
    * Choose the fields to return or not. By define the field with or without the prefix minus sign "-".
    * @example
    * 'field1 field2 -field3'
    */
-  select?: string;
+  select?: keyof DataType | `-${Exclude<keyof DataType, symbol>}`;
   /**
    * The filter of the populated doc.
    * @example
    * { field1: 'value1', field2: { gt: 10 } }
    */
-  match?: Partial<Record<keyof DataType, Partial<ClientProvidedMongoDBOperators>>>;
+  match?: Partial<Record<keyof DataType, string | Partial<ClientProvidedMongoDBOperators>>>;
   /**
    * For deep population. Repeat the embed object.
    */
@@ -145,7 +145,7 @@ export type GetRequestArgs<
      * @example
      * 'field1 field2 -field3'
      */
-    _select?: string;
+    _select?: DataType extends undefined ? string : Exclude<Embed<DataType>['select'], undefined>;
     /**
      * Embed the related collection in the result.
      * @example
@@ -155,7 +155,7 @@ export type GetRequestArgs<
      * @example
      * [{ path: 'field' }]
      */
-    _embed?: string | Embed<DataType> | Embed<DataType>[];
+    _embed?: keyof DataType | Embed<DataType> | Embed<DataType>[];
     /**
      * Sort column(s).
      * @example

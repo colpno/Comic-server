@@ -63,7 +63,7 @@ export default class Pipeline extends ApiQuery {
     }
 
     if (_select) {
-      pipeline.push(this.pickingFieldsPipeline(_select));
+      pipeline.push(this.pickingFieldsPipeline(_select as string));
     }
 
     if (_page && _limit) {
@@ -128,6 +128,7 @@ export default class Pipeline extends ApiQuery {
     const handler = (embedment: typeof _embed, prefixLocalField = ''): PipelineStage[] => {
       const pipelines: PipelineStage[] = [];
 
+      // @ts-ignore
       const embeds: Embed[] =
         typeof embedment === 'string'
           ? [{ path: embedment }]
