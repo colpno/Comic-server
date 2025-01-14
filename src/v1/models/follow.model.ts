@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 
 import { MongoDoc } from '../types/common.type';
-import { Follow as OriFollow } from '../types/follow.type';
-import { arrayMinLength } from '../utils/validation.util';
 
-interface Follow extends Pick<OriFollow, 'following'> {
+interface Follow {
   follower: mongoose.Types.ObjectId;
+  following: string;
+  addedAt: Date;
 }
 
 const schema = new mongoose.Schema<Follow>(
@@ -16,9 +16,12 @@ const schema = new mongoose.Schema<Follow>(
       required: true,
     },
     following: {
-      type: [String],
+      type: String,
       required: true,
-      validate: [arrayMinLength(1), 'At least one following is required'],
+    },
+    addedAt: {
+      type: Date,
+      default: Date.now,
     },
   },
   { timestamps: true }

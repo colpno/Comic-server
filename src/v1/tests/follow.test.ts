@@ -38,9 +38,9 @@ describe('Follows', () => {
 
   it('should return 200 for adding to existing', async () => {
     const url = getEndpoint();
-    const body: AddFollowBody = {
+    const body: AddFollowBody & { follower: string } = {
       follower: '677bc194168fabfa6afc3ed0',
-      following: 'test',
+      followingId: 'test',
     };
     const cookies = [...csrfTokenCookie, ...authCookies];
 

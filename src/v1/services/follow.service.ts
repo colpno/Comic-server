@@ -1,6 +1,7 @@
 import { FilterQuery } from 'mongoose';
 
 import { FollowModel } from '../models';
+import { GetRequestArgs } from '../types/api.type';
 import { Follow } from '../types/follow.type';
 import { toObjectId } from '../utils/converter.util';
 import Pipeline from '../utils/Pipeline.util';
@@ -12,12 +13,32 @@ const filterToObjectId = (filter: FilterQuery<Follow>) => {
 
 export const _Pipeline = new Pipeline();
 
-export const getFollow = async (filter: FilterQuery<Follow>) => {
-  filterToObjectId(filter);
+export const getFollows = async ({
+  _page = 1,
+  _limit = 1,
+  ...filter
+}: GetRequestArgs<Follow> & FilterQuery<Follow>) => {
+  if (filter._select) filter._select += ' -follower';
+  else filter._select = '-follower';
 
-  const result = await FollowModel.find(filter);
+  const pipeline = _Pipeline.generate(filter);
 
-  return (result[0] as unknown as Follow) || null;
+  const result = await FollowModel.aggregate<Omit<Follow, 'follower'>>(pipeline);
+
+  const { _sort, ...otherQueries } = filter;
+
+  const count = await FollowModel.aggregate(_Pipeline.countingPipeline(otherQueries, pipeline));
+
+  const total = count?.[0]?.total || 0;
+
+  return {
+    total,
+    totalPages: Math.ceil(total / _limit),
+    page: _page || 1,
+    perPage: _limit,
+    pageSize: result.length,
+    data: result,
+  };
 };
 
 export const createFollow = async (follow: Pick<Follow, 'follower' | 'following'>) => {
