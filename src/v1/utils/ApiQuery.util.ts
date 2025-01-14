@@ -162,7 +162,10 @@ export default class ApiQuery {
     input: Record<keyof DataType, PrimitiveType | Partial<ClientProvidedMongoDBOperators>>
   ) {
     const translate = (obj: typeof input) => {
-      type Result = Record<string, PrimitiveType | Partial<ValueOf<MongoDBOperatorsMap>>>;
+      type Result = Record<
+        string,
+        PrimitiveType | ObjectId | Partial<ValueOf<MongoDBOperatorsMap>>
+      >;
       const result: Result = {};
 
       for (const [objKey, objValue] of Object.entries(obj)) {
@@ -178,37 +181,14 @@ export default class ApiQuery {
           continue;
         }
 
-        result[objKey] = objValue;
+        result[objKey] = isObjectIdOrHexString(objValue)
+          ? ObjectId.createFromHexString(objValue as string)
+          : objValue;
       }
 
       return result as Record<keyof DataType, ValueOf<Result>>;
     };
 
-    const joinKeys = <T extends Record<string, unknown>>(obj: T, prefix = '') => {
-      const result: Record<string, unknown> = {};
-
-      for (const objKey in obj) {
-        if (obj.hasOwnProperty(objKey)) {
-          const objValue = obj[objKey];
-          const prefixedKey = prefix ? `${prefix}.${objKey}` : objKey;
-
-          if (
-            typeof objValue === 'object' &&
-            objValue !== null &&
-            !this.isMongoOperator(objValue as typeof result)
-          ) {
-            const nestedResult = joinKeys(objValue as typeof obj, prefixedKey);
-            Object.assign(result, nestedResult);
-            continue;
-          }
-
-          result[prefixedKey] = objValue;
-        }
-      }
-
-      return result as T;
-    };
-
-    return joinKeys(translate(input));
+    return translate(input);
   }
 }
