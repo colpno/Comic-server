@@ -70,6 +70,10 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
     includedTags: Joi.array().items(Joi.string()),
     includedTagsMode: Joi.string().valid(...allowedTagMode),
     ids: Joi.array().items(Joi.string()),
+    excludedTags: Joi.array().items(Joi.string()),
+    excludedTagsMode: Joi.string().valid(...allowedTagMode),
+    _limit: Joi.number().integer().positive().max(100),
+    _page: Joi.number().integer().positive(),
   });
 
   const { error, value } = schema.validate(req.query, options);

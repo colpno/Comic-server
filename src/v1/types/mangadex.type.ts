@@ -215,36 +215,6 @@ export interface MangaListQuerySort {}
 
 export interface MangaListQuery {
   /**
-   * Manga ids. Limit to 100 ids.
-   */
-  ids?: string[];
-  /**
-   * Manga type.
-   * @example
-   * 'manga'
-   */
-  type?: string;
-  title?: string;
-  status?: MangaStatus[];
-  /**
-   * Release year.
-   * @example
-   * 2021
-   */
-  year?: number;
-  contentRating?: ContentRating;
-  createdAt?: string;
-  updatedAt?: string;
-  hasAvailableChapters?: string;
-  includedTags?: string[];
-  includedTagsMode?: 'AND' | 'OR';
-  /**
-   * Relationships to include.
-   * @example
-   * ['author', 'artist']
-   */
-  includes?: ResponseManga['relationships'][number]['type'][];
-  /**
    * Number of items to return.
    * @default
    * 20
@@ -256,6 +226,23 @@ export interface MangaListQuery {
    * 20
    */
   offset?: number;
+  title?: string;
+  /**
+   * Release year.
+   * @example
+   * 2021
+   */
+  year?: number;
+  includedTags?: string[];
+  includedTagsMode?: 'AND' | 'OR';
+  excludedTags?: string[];
+  excludedTagsMode?: 'AND' | 'OR';
+  status?: MangaStatus[];
+  /**
+   * Manga ids. Limit to 100 ids.
+   */
+  ids?: string[];
+  contentRating?: ContentRating;
   /**
    * Sorting.
    * @example
@@ -271,6 +258,21 @@ export interface MangaListQuery {
     relevance?: unknown;
     rating?: unknown;
   }>;
+  /**
+   * Relationships to include.
+   * @example
+   * ['author', 'artist']
+   */
+  includes?: ResponseManga['relationships'][number]['type'][];
+  hasAvailableChapters?: string;
+  /**
+   * Manga type.
+   * @example
+   * 'manga'
+   */
+  type?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MangaByIdQuery {
