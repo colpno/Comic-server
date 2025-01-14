@@ -1,12 +1,13 @@
 import { RequestHandler } from 'express';
 
 import { BASE_ENDPOINT, PAGINATION_PAGE, PAGINATION_PER_PAGE } from '../constants/common.constant';
+import { comicService } from '../services';
 import { GetRequestArgs, SuccessfulResponse } from '../types/api.type';
 import { Comic } from '../types/comic.type';
 import { MangaListQuery, ResponseManga } from '../types/mangadex.type';
 import { calculateOffset, toMangaDexEmbedValue } from '../utils/mangadex.util';
 import { generatePaginationMeta } from '../utils/meta.util';
-import { getMangaById, getMangaList, getTagIdList } from './mangadex.controller';
+import { getMangaById, getMangaList } from './mangadex.controller';
 
 type MangaRelationship = ResponseManga['relationships'][number]['type'];
 
@@ -23,25 +24,12 @@ export type GetComics = RequestHandler<{}, SuccessfulResponse<Comic[]>, null, Ge
 
 export const getComicList: GetComics = async (req, res, next) => {
   try {
-    const {
-      _limit = PAGINATION_PER_PAGE,
-      _page = PAGINATION_PAGE,
-      _embed,
-      _sort,
-      includedTags,
-      ...query
-    } = req.query;
+    const { _limit = PAGINATION_PER_PAGE, _page = PAGINATION_PAGE, ...query } = req.query;
 
-    const tagIds =
-      includedTags && includedTags.length > 0 ? await getTagIdList(includedTags) : undefined;
-
-    const { data: comics, meta } = await getMangaList({
+    const { data: comics, meta } = await comicService.getComicList({
       ...query,
-      includedTags: tagIds,
-      includes: toMangaDexEmbedValue(_embed),
-      order: _sort,
-      limit: _limit,
-      offset: calculateOffset(_limit, _page),
+      _limit,
+      _page,
     });
 
     const result: SuccessfulResponse<Comic[]> = {
