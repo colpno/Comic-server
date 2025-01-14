@@ -11,15 +11,24 @@ const filterToObjectId = (filter: FilterQuery<User>) => {
 export const getUser = async (filter: FilterQuery<User>) => {
   filterToObjectId(filter);
 
-  return await UserModel.findOne(filter);
+  const user = await UserModel.findOne(filter);
+
+  return user as unknown as User;
 };
 
-export const createUser = async (user: Pick<User, 'email' | 'password'>) => {
-  return await UserModel.create(user);
+export const createUser = async (data: Pick<User, 'email' | 'password'>) => {
+  const user = await UserModel.create({
+    ...data,
+    uuid: crypto.randomUUID(),
+  });
+
+  return user as unknown as User;
 };
 
 export const updateUser = async (filter: FilterQuery<User>, update: Partial<User>) => {
   filterToObjectId(filter);
 
-  return await UserModel.findOneAndUpdate(filter, update, { new: true });
+  const user = await UserModel.findOneAndUpdate(filter, update, { new: true });
+
+  return user as unknown as User;
 };
