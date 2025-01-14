@@ -25,7 +25,10 @@ export const createUser = async (data: Pick<User, 'email' | 'password'>) => {
   return user as unknown as User;
 };
 
-export const updateUser = async (filter: FilterQuery<User>, update: Partial<User>) => {
+export const updateUser = async (
+  filter: FilterQuery<User>,
+  update: Parameters<typeof UserModel.findOneAndUpdate>[1]
+) => {
   filterToObjectId(filter);
 
   const user = await UserModel.findOneAndUpdate(filter, update, { new: true });
