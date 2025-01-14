@@ -14,7 +14,7 @@ import { SuccessfulResponse } from '../types/api.type';
 import { JWTPayload } from '../types/common.type';
 import { User } from '../types/user.type';
 import { toMS } from '../utils/converter.util';
-import { generateSalt, hashString } from '../utils/crypto';
+import { generateSalt, hashString } from '../utils/crypto.util';
 import { Error400, Error403, Error404 } from '../utils/error.utils';
 
 const MS_15MINS = toMS(15, 'minutes');
@@ -56,7 +56,7 @@ export const login: Login = async (req, res, next) => {
 
     // Create tokens
     const jwtPayload: JWTPayload = {
-      userId: user._id.toString(),
+      userId: user.id,
     };
     const accessToken = jwt.sign(jwtPayload, ACCESS_TOKEN_SECRET, { expiresIn: MS_15MINS });
     const refreshToken = jwt.sign(jwtPayload, REFRESH_TOKEN_SECRET, {
@@ -66,6 +66,11 @@ export const login: Login = async (req, res, next) => {
     res.cookie(COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookieConfig);
     res.cookie(COOKIE_NAME_ACCESS_TOKEN, accessToken, cookieConfig);
     return res.sendStatus(HTTP_204_NO_CONTENT);
+    // return res.json({
+    //   data: {
+    //     id: jwtPayload.userId,
+    //   },
+    // });
   } catch (error) {
     next(error);
   }
@@ -94,7 +99,7 @@ export const logout: RequestHandler = async (req, res, next) => {
     }
 
     // Remove refresh token
-    await updateUser({ _id: userWithRefreshToken._id }, { refreshToken: '' });
+    await updateUser({ _id: userWithRefreshToken.id }, { $unset: { refreshToken: 1 } });
     clearCookies();
 
     return res.sendStatus(HTTP_204_NO_CONTENT);
