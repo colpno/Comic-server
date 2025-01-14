@@ -12,12 +12,12 @@ const filterToObjectId = (filter: FilterQuery<Follow>) => {
 
 export const _Pipeline = new Pipeline();
 
-export const getFollows = async (filter: FilterQuery<Follow>) => {
+export const getFollow = async (filter: FilterQuery<Follow>) => {
   filterToObjectId(filter);
 
   const result = await FollowModel.find(filter);
 
-  return result[0]?.following || [];
+  return (result[0] as unknown as Follow) || null;
 };
 
 export const createFollow = async (follow: Pick<Follow, 'follower' | 'following'>) => {
