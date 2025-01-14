@@ -74,10 +74,16 @@ export default class Pipeline extends ApiQuery {
       pipeline.push({ $limit: _limit });
     }
 
+    // Add the stage to rename _id to id and remove __v
+    pipeline.push({ $addFields: { id: '$_id' } }, { $project: { _id: 0, __v: 0 } });
+
     return pipeline;
   }
 
-  public countingPipeline(queries: GetRequestArgs, pipelines?: PipelineStage[]): PipelineStage[] {
+  public countingPipeline(
+    queries: GetRequestArgs<{ [x: string]: unknown }>,
+    pipelines?: PipelineStage[]
+  ): PipelineStage[] {
     if (!pipelines) {
       pipelines = this.generate(queries);
     }
