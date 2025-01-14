@@ -4,12 +4,13 @@ import { Schema } from 'joi';
 import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
 import { AddFollow, GetFollowList, RemoveFollow } from '../controllers/follow.controller';
+import { MangaListQuery } from '../types/mangadex.type';
 import { processValidationError } from '../utils/validation.util';
 
 type GetFollowListSchema = Record<keyof Parameters<GetFollowList>[0]['query'], Schema>;
 
 export const getFollowList = (req: Request, res: Response, next: NextFunction) => {
-  const comicAllowedSorts = [
+  const comicAllowedSorts: (keyof Exclude<MangaListQuery['order'], undefined>)[] = [
     'title',
     'year',
     'createdAt',
@@ -17,12 +18,13 @@ export const getFollowList = (req: Request, res: Response, next: NextFunction) =
     'latestUploadedChapter',
     'followedCount',
     'relevance',
+    'rating',
   ];
 
   const schema = Joi.object<GetFollowListSchema>({
     _embed: Joi.string().valid('following'),
-    _limit: Joi.number().integer().min(1).max(100).optional(),
-    _page: Joi.number().integer().min(0).default(1),
+    _limit: Joi.number().integer().min(1).max(100).required(),
+    _page: Joi.number().integer().min(0).required(),
     _sort: Joi.object().pattern(
       Joi.string().valid(...comicAllowedSorts),
       Joi.string().valid('asc', 'desc')
