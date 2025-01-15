@@ -5,7 +5,6 @@ import { Chapter } from '../types/chapter.type';
 import { Comic } from '../types/comic.type';
 import {
   ChapterImages,
-  MangaByIdQuery,
   MangaFeedQuery,
   MangaListQuery,
   Response as MangaDexResponse,
@@ -14,20 +13,14 @@ import {
 const BASE_URL = 'https://api.mangadex.org' as const;
 const MANGA_URL = `${BASE_URL}/manga` as const;
 const TAG_URL = `${MANGA_URL}/tag` as const;
-const getSpecificMangaUrl = (mangaId: string) => `${BASE_URL}/manga/${mangaId}` as const;
 const getMangaChaptersUrl = (mangaId: string) => `${BASE_URL}/manga/${mangaId}/feed` as const;
 const getChapterImagesUrl = (chapterId: string) =>
   `${BASE_URL}/at-home/server/${chapterId}` as const;
 
 export const getTagList = async () => {
   try {
-    const { data } = await axios<MangaDexResponse<'collection', 'tag'>>(TAG_URL);
-
-    // Remove illegal tags
-    const illegalTags = ['Incest', 'Sexual Violence'];
-    const tags = data.data.filter((tag) => !illegalTags.includes(tag.attributes.name.en));
-
-    return tags;
+    const res = await axios<MangaDexResponse<'collection', 'tag'>>(TAG_URL);
+    return res.data.data;
   } catch (error) {
     throw error;
   }
@@ -53,12 +46,11 @@ export const getTagIdList = async (tagNames: string[]) => {
 
 export const getMangaList = async (query: MangaListQuery) => {
   try {
-    const filters = query;
-
     const response = await axios.get<MangaDexResponse<'collection', 'manga'>>(MANGA_URL, {
       params: {
         contentRating: ['safe', 'suggestive'],
-        ...filters,
+        availableTranslatedLanguage: ['en'],
+        ...query,
       },
     });
     const { data } = response;
@@ -81,15 +73,30 @@ export const getMangaList = async (query: MangaListQuery) => {
   }
 };
 
-export const getMangaById = async (mangaId: string, query: MangaByIdQuery) => {
+export const getMangaByTitle = async (
+  titleQuery: string,
+  query: Pick<MangaListQuery, 'includes'>
+) => {
   try {
-    const url = getSpecificMangaUrl(mangaId);
+    const title = titleQuery.replace(/-/g, ' ');
 
-    const response = await axios.get<MangaDexResponse<'entity', 'manga'>>(url, {
-      params: query,
+    const response = await axios.get<MangaDexResponse<'collection', 'manga'>>(MANGA_URL, {
+      params: {
+        contentRating: ['safe', 'suggestive'],
+        availableTranslatedLanguage: ['en'],
+        ...query,
+        title,
+      },
     });
 
-    const comic: Comic = mangadexToComic(response.data.data);
+    // Find the manga with the exact title
+    const manga = response.data.data.find(
+      (manga) => manga.attributes.title.en.toLowerCase() === title.toLowerCase()
+    );
+
+    if (!manga) return null;
+
+    const comic: Comic = mangadexToComic(manga);
 
     return comic;
   } catch (error) {
@@ -112,21 +119,34 @@ export const getChaptersByMangaId = async (mangaId: string, query: MangaFeedQuer
       return acc;
     }, {} as Record<string, 0>);
 
+    const params = {
+      ...includeParam,
+      ...excludeParam,
+      contentRating: ['safe', 'suggestive'],
+      translatedLanguage: ['en'],
+      limit,
+      offset,
+      order,
+    };
+
     const response = await axios.get<MangaDexResponse<'collection', 'chapter'>>(url, {
-      params: {
-        ...includeParam,
-        ...excludeParam,
-        contentRating: ['safe', 'suggestive'],
-        limit,
-        offset,
-        order,
-      },
+      params,
     });
-    const { data } = response;
+    const { data, ...restResponse } = response.data;
 
-    const chapters: Chapter[] = data.data.map((chapter) => mangadexToChapter(chapter));
+    const chapters: Chapter[] = data.map((chapter) => mangadexToChapter(chapter));
 
-    return chapters;
+    const meta = {
+      page: restResponse.offset / restResponse.limit + 1,
+      limit: restResponse.limit,
+      totalItems: restResponse.total,
+      totalPages: Math.ceil(restResponse.total / restResponse.limit),
+    };
+
+    return {
+      data: chapters,
+      meta,
+    };
   } catch (error) {
     throw error;
   }
