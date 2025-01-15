@@ -3,10 +3,8 @@ import { MongoDocFields } from './common.type';
 export type Chapter = {
   id: string;
   title: string;
-  /** Belongs to which volume. */
-  volume?: number;
-  /** The chapter number in numeric. */
-  chapter?: number;
+  volume?: string;
+  chapter?: string;
   /** Urls. */
   content?: ChapterContent[];
   publishAt?: string;

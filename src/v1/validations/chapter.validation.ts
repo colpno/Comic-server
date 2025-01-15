@@ -3,9 +3,9 @@ import { Schema, ValidationOptions } from 'joi';
 
 import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
-import { PAGINATION_PAGE, PAGINATION_PER_PAGE } from '../constants/common.constant';
 import { GetChaptersByMangaId } from '../controllers/chapter.controller';
 import { Response } from '../types/api.type';
+import { Chapter } from '../types/chapter.type';
 import { processValidationError } from '../utils/validation.util';
 
 type GetChaptersByComicIdSchema = {
@@ -15,6 +15,14 @@ type GetChaptersByComicIdSchema = {
 
 export const getChaptersByComicId = (req: Request, res: Response, next: NextFunction) => {
   const allowedIncludes = ['emptyPages', 'futurePublishAt', 'externalUrl'];
+  const allowedSort: (keyof Chapter)[] = [
+    'createdAt',
+    'updatedAt',
+    'publishAt',
+    'readableAt',
+    'volume',
+    'chapter',
+  ];
 
   const options: ValidationOptions = {
     stripUnknown: true,
@@ -25,9 +33,12 @@ export const getChaptersByComicId = (req: Request, res: Response, next: NextFunc
   });
 
   const querySchema = Joi.object<GetChaptersByComicIdSchema['query']>({
-    _limit: Joi.number().integer().min(1).max(100).default(PAGINATION_PER_PAGE),
-    _page: Joi.number().integer().min(1).default(PAGINATION_PAGE),
-    _sort: Joi.object().pattern(Joi.string(), Joi.string().valid('asc', 'desc')),
+    _limit: Joi.number().integer().min(1).max(500),
+    _page: Joi.number().integer().min(1),
+    _sort: Joi.object().pattern(
+      Joi.string().valid(...allowedSort),
+      Joi.string().valid('asc', 'desc')
+    ),
     include: Joi.array().items(Joi.string().valid(...allowedIncludes)),
     exclude: Joi.array().items(Joi.string().valid(...allowedIncludes)),
   });

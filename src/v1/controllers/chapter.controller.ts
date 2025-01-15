@@ -1,18 +1,20 @@
 import { RequestHandler } from 'express';
 
-import { GetRequestArgs, SuccessfulResponse } from '../types/api.type';
+import { BASE_ENDPOINT } from '../constants/common.constant';
+import { GetRequestArgs, Sort, SuccessfulResponse } from '../types/api.type';
 import { Chapter } from '../types/chapter.type';
+import { MangaFeedQuery } from '../types/mangadex.type';
+import { calculateOffset } from '../utils/mangadex.util';
+import { generatePaginationMeta } from '../utils/meta.util';
 import * as mangadexController from './mangadex.controller';
 
-type GetChaptersByMangaIdQuery =
-  | (Omit<GetRequestArgs, '_select' | '_embed'> & {
-      include?: ('emptyPages' | 'futurePublishAt' | 'externalUrl')[];
-      exclude?: ('emptyPages' | 'futurePublishAt' | 'externalUrl')[];
-    })
-  // There is an error when adding additional query parameters like above: "missing props in ParsedQS" occurs when using getChaptersByMangaId in routes.
-  // Some are not facing the issue, but some are.
-  // Workaround for the issue:
-  | qs.ParsedQs;
+type GetChaptersByMangaIdQuery = Omit<GetRequestArgs, '_select' | '_embed' | '_sort'> & {
+  include?: ('emptyPages' | 'futurePublishAt' | 'externalUrl')[];
+  exclude?: ('emptyPages' | 'futurePublishAt' | 'externalUrl')[];
+  _sort?: Sort<
+    Pick<Chapter, 'createdAt' | 'updatedAt' | 'publishAt' | 'readableAt' | 'volume' | 'chapter'>
+  >;
+};
 export type GetChaptersByMangaId = RequestHandler<
   { id: string },
   SuccessfulResponse<Chapter[]>,
@@ -23,10 +25,36 @@ export type GetChaptersByMangaId = RequestHandler<
 export const getChaptersByComicId: GetChaptersByMangaId = async (req, res, next) => {
   try {
     const { id: mangaId } = req.params;
+    const { _limit, _page, _sort, ...query } = req.query;
 
-    const chapters = await mangadexController.getChaptersByMangaId(mangaId, req.query);
+    const queryParams: MangaFeedQuery = {
+      exclude: query.exclude,
+      include: query.include,
+      limit: _limit,
+      offset: calculateOffset(_limit, _page),
+      order: _sort,
+    };
 
-    return res.json({ data: chapters });
+    const response = await mangadexController.getChaptersByMangaId(mangaId, queryParams);
+    const { data, meta } = response;
+
+    const result: SuccessfulResponse<Chapter[]> = {
+      data,
+    };
+
+    if (_limit && _page) {
+      result.metadata = {
+        pagination: generatePaginationMeta({
+          page: _page,
+          perPage: _limit,
+          endpoint: `${BASE_ENDPOINT}/${mangaId}/chapters`,
+          totalItems: meta.totalItems,
+          totalPages: meta.totalPages,
+        }),
+      };
+    }
+
+    return res.json(result);
   } catch (error) {
     next(error);
   }
