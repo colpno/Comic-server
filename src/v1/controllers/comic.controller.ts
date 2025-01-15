@@ -1,13 +1,13 @@
 import { RequestHandler } from 'express';
 
-import { BASE_ENDPOINT, PAGINATION_PAGE, PAGINATION_PER_PAGE } from '../constants/common.constant';
+import { BASE_ENDPOINT } from '../constants/common.constant';
 import { comicService } from '../services';
 import { GetRequestArgs, SuccessfulResponse } from '../types/api.type';
 import { Comic } from '../types/comic.type';
 import { MangaListQuery, ResponseManga } from '../types/mangadex.type';
 import { toMangaDexEmbedValue } from '../utils/mangadex.util';
 import { generatePaginationMeta } from '../utils/meta.util';
-import { getMangaById } from './mangadex.controller';
+import { getMangaByTitle } from './mangadex.controller';
 
 type MangaRelationship = ResponseManga['relationships'][number]['type'];
 
@@ -24,7 +24,7 @@ export type GetComics = RequestHandler<{}, SuccessfulResponse<Comic[]>, null, Ge
 
 export const getComicList: GetComics = async (req, res, next) => {
   try {
-    const { _limit = PAGINATION_PER_PAGE, _page = PAGINATION_PAGE, ...query } = req.query;
+    const { _limit, _page, ...query } = req.query;
 
     const { data: comics, meta } = await comicService.getComicList({
       ...query,
@@ -36,8 +36,8 @@ export const getComicList: GetComics = async (req, res, next) => {
       data: comics,
       metadata: {
         pagination: generatePaginationMeta({
-          page: _page,
-          perPage: _limit,
+          page: _page || 1, // default page is 1
+          perPage: _limit || 100, // default perPage is 100 based on mangadex
           endpoint: `${BASE_ENDPOINT}/comics`,
           totalItems: meta.totalItems,
           totalPages: meta.totalPages,
@@ -51,25 +51,25 @@ export const getComicList: GetComics = async (req, res, next) => {
   }
 };
 
-type GetComicByIdQuery = {
+type GetComicQuery = {
   /**
    * Available values: cover_art, manga, author, artist, tag
    */
   _embed?: MangaRelationship | MangaRelationship[];
 };
-export type GetComicById = RequestHandler<
-  { id: string },
-  SuccessfulResponse<Comic>,
+export type GetComic = RequestHandler<
+  { title: string },
+  SuccessfulResponse<Comic | null>,
   {},
-  GetComicByIdQuery
+  GetComicQuery
 >;
 
-export const getComicById: GetComicById = async (req, res, next) => {
+export const getComicByTitle: GetComic = async (req, res, next) => {
   try {
-    const { id: mangaId } = req.params;
+    const { title } = req.params;
     const { _embed } = req.query;
 
-    const comic = await getMangaById(mangaId, { includes: toMangaDexEmbedValue(_embed) });
+    const comic = await getMangaByTitle(title, { includes: toMangaDexEmbedValue(_embed) });
 
     return res.json({ data: comic });
   } catch (error) {

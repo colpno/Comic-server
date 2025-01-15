@@ -10,7 +10,7 @@ router.get(
   chapterValidator.getChaptersByComicId,
   chapterController.getChaptersByComicId
 );
-router.get('/:id', comicValidator.getComicById, comicController.getComicById);
+router.get('/:title', comicValidator.getComicByTitle, comicController.getComicByTitle);
 router.get('/', comicValidator.getComicList, comicController.getComicList);
 
 const comicRouter = router;

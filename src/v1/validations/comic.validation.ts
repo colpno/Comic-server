@@ -3,7 +3,7 @@ import { Schema, ValidationOptions } from 'joi';
 
 import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
-import { GetComicById, GetComics } from '../controllers/comic.controller';
+import { GetComic, GetComics } from '../controllers/comic.controller';
 import { MangaListQuery } from '../types/mangadex.type';
 import { processValidationError, validateGetRequest } from '../utils/validation.util';
 import { mangadexMangaListSchema } from './variables';
@@ -42,18 +42,7 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
     ),
     _embed: Joi.alternatives().try(
       Joi.string().valid(...allowedEmbeds),
-      Joi.object({
-        path: Joi.string()
-          .valid(...allowedEmbeds)
-          .required(),
-      }),
-      Joi.array().items(
-        Joi.object({
-          path: Joi.string()
-            .valid(...allowedEmbeds)
-            .required(),
-        })
-      )
+      Joi.array().items(Joi.string().valid(...allowedEmbeds))
     ),
     _limit: Joi.number().integer().positive().max(100),
     _page: Joi.number().integer().positive(),
@@ -73,11 +62,11 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
 };
 
 type GetComicByIdSchema = {
-  query: Record<keyof Parameters<GetComicById>[0]['query'], Schema>;
-  params: Record<keyof Parameters<GetComicById>[0]['params'], Schema>;
+  query: Record<keyof Parameters<GetComic>[0]['query'], Schema>;
+  params: Record<keyof Parameters<GetComic>[0]['params'], Schema>;
 };
 
-export const getComicById = (req: Request, res: Response, next: NextFunction) => {
+export const getComicByTitle = (req: Request, res: Response, next: NextFunction) => {
   const allowedEmbeds: MangaListQuery['includes'] = [
     'author',
     'artist',
@@ -91,7 +80,7 @@ export const getComicById = (req: Request, res: Response, next: NextFunction) =>
   };
 
   const paramSchema = Joi.object<GetComicByIdSchema['params']>({
-    id: Joi.string().required(),
+    title: Joi.string().required(),
   });
 
   const querySchema = Joi.object<GetComicByIdSchema['query']>({
