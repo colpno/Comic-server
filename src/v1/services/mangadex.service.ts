@@ -1,11 +1,52 @@
 import { Chapter } from '../types/chapter.type';
 import { Comic } from '../types/comic.type';
-import { ResponseChapter, ResponseManga } from '../types/mangadex.type';
+import {
+  Relationship,
+  RelationshipType,
+  ResponseChapter,
+  ResponseManga,
+} from '../types/mangadex.type';
+
+const groupRelationships = (relationships: ResponseManga['relationships']) => {
+  const grouped = [...relationships].reduce((acc, relationship) => {
+    const { type, attributes, id } = relationship;
+
+    // Initialize the array if it doesn't exist.
+    if (!acc[type]) {
+      acc[type] = [];
+    }
+
+    // Push the relationship if embedded or ID to the array.
+    if (attributes) {
+      acc[type].push(relationship);
+    } else {
+      !acc[type].includes(id) && acc[type].push(id);
+    }
+
+    return acc;
+  }, {} as Record<RelationshipType, unknown[]>);
+
+  return grouped;
+};
 
 export const mangadexToComic = (manga: ResponseManga): Comic => {
-  const coverArt = manga.relationships.find((relationship) => relationship.type === 'cover_art');
-  const coverFilename =
-    coverArt?.attributes && 'fileName' in coverArt.attributes ? coverArt.attributes.fileName : '';
+  let cover: string = '';
+  let relationships: Record<RelationshipType, unknown[]> | undefined;
+
+  if ('relationships' in manga) {
+    const coverArt = manga.relationships.find((relationship) => relationship.type === 'cover_art');
+    const coverFilename =
+      coverArt?.attributes && 'fileName' in coverArt.attributes
+        ? coverArt.attributes.fileName
+        : null;
+    cover = coverFilename ? `https://uploads.mangadex.org/covers/${manga.id}/${coverFilename}` : '';
+    relationships = groupRelationships(manga.relationships);
+  }
+
+  const authors =
+    (relationships?.author as (Required<Relationship<'author'>> | string)[]) || undefined;
+  const artists =
+    (relationships?.artist as (Required<Relationship<'artist'>> | string)[]) || undefined;
 
   return {
     id: manga.id,
@@ -36,31 +77,26 @@ export const mangadexToComic = (manga: ResponseManga): Comic => {
     updatedAt: manga.attributes.updatedAt,
     /** Chapter ID. */
     latestUploadedChapter: manga.attributes.latestUploadedChapter || undefined,
-    coverImageUrl: coverFilename
-      ? `https://uploads.mangadex.org/covers/${manga.id}/${coverFilename}`
-      : '',
+    coverImageUrl: cover,
     chapters: [],
     // /** Comic IDs. */
-    related: manga.relationships.reduce((acc, relationship) => {
-      relationship.type === 'manga' && acc.push(relationship.id);
-      return acc;
-    }, [] as string[]),
-    authors: manga.relationships.reduce((acc, relationship) => {
-      relationship.type === 'author' && acc.push(relationship.id);
-      return acc;
-    }, [] as string[]),
-    artists: manga.relationships.reduce((acc, relationship) => {
-      relationship.type === 'artist' && acc.push(relationship.id);
-      return acc;
-    }, [] as string[]),
+    related: relationships?.manga as string[],
+    authors: authors?.map((a) => {
+      if (typeof a === 'string') return a;
+      return { id: a.id, name: a.attributes.name || 'Unknown' };
+    }),
+    artists: artists?.map((a) => {
+      if (typeof a === 'string') return a;
+      return { id: a.id, name: a.attributes.name || 'Unknown' };
+    }),
   };
 };
 
 export const mangadexToChapter = (chapter: ResponseChapter): Chapter => ({
   id: chapter.id,
   title: chapter.attributes.title,
-  volume: chapter.attributes.volume ? parseInt(chapter.attributes.volume) : undefined,
-  chapter: chapter.attributes.chapter ? parseInt(chapter.attributes.chapter) : undefined,
+  volume: chapter.attributes.volume || undefined,
+  chapter: chapter.attributes.chapter || undefined,
   content: undefined,
   publishAt: chapter.attributes.publishAt || undefined,
   readableAt: chapter.attributes.readableAt || undefined,
