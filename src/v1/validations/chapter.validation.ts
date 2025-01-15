@@ -1,5 +1,5 @@
 import { NextFunction, Request } from 'express';
-import { Schema, ValidationOptions } from 'joi';
+import { Schema } from 'joi';
 
 import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
@@ -7,6 +7,7 @@ import { GetChaptersByMangaId } from '../controllers/chapter.controller';
 import { Response } from '../types/api.type';
 import { Chapter } from '../types/chapter.type';
 import { processValidationError } from '../utils/validation.util';
+import { validationOptions } from './';
 
 type GetChaptersByComicIdSchema = {
   query: Record<keyof Parameters<GetChaptersByMangaId>['0']['query'], Schema>;
@@ -24,10 +25,6 @@ export const getChaptersByComicId = (req: Request, res: Response, next: NextFunc
     'chapter',
   ];
 
-  const options: ValidationOptions = {
-    stripUnknown: true,
-  };
-
   const paramSchema = Joi.object<GetChaptersByComicIdSchema['params']>({
     id: Joi.string().required(),
   });
@@ -43,8 +40,14 @@ export const getChaptersByComicId = (req: Request, res: Response, next: NextFunc
     exclude: Joi.array().items(Joi.string().valid(...allowedIncludes)),
   });
 
-  const { error: paramError, value: paramValue } = paramSchema.validate(req.params);
-  const { error: queryError, value: queryValue } = querySchema.validate(req.query, options);
+  const { error: paramError, value: paramValue } = paramSchema.validate(
+    req.params,
+    validationOptions
+  );
+  const { error: queryError, value: queryValue } = querySchema.validate(
+    req.query,
+    validationOptions
+  );
 
   if (paramError || queryError) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(paramError! || queryError));
@@ -68,7 +71,7 @@ export const getChapterContent = (req: Request, res: Response, next: NextFunctio
     id: Joi.string().required(),
   });
 
-  const { error, value } = paramSchema.validate(req.params);
+  const { error, value } = paramSchema.validate(req.params, validationOptions);
 
   if (error) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));

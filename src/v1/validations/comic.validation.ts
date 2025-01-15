@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { Schema, ValidationOptions } from 'joi';
+import { Schema } from 'joi';
 
 import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
 import { GetComic, GetComics } from '../controllers/comic.controller';
 import { MangaListQuery } from '../types/mangadex.type';
 import { processValidationError, validateGetRequest } from '../utils/validation.util';
+import { validationOptions } from './';
 import { mangadexMangaListSchema } from './variables';
 
 type GetComicListSchema = Record<keyof Parameters<GetComics>[0]['query'], Schema>;
@@ -30,10 +31,6 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
     'rating',
   ];
 
-  const options: ValidationOptions = {
-    stripUnknown: true,
-  };
-
   const schema = Joi.object<GetComicListSchema>({
     ...commands,
     _sort: Joi.object().pattern(
@@ -49,7 +46,7 @@ export const getComicList = (req: Request, res: Response, next: NextFunction) =>
     ...mangadexMangaListSchema,
   });
 
-  const { error, value } = schema.validate(req.query, options);
+  const { error, value } = schema.validate(req.query, validationOptions);
 
   if (error) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));
@@ -75,10 +72,6 @@ export const getComicByTitle = (req: Request, res: Response, next: NextFunction)
     'tag',
   ];
 
-  const options: ValidationOptions = {
-    stripUnknown: true,
-  };
-
   const paramSchema = Joi.object<GetComicByIdSchema['params']>({
     title: Joi.string().required(),
   });
@@ -87,8 +80,14 @@ export const getComicByTitle = (req: Request, res: Response, next: NextFunction)
     _embed: Joi.array().items(Joi.string().valid(...allowedEmbeds)),
   });
 
-  const { error: queryError, value: queryValue } = querySchema.validate(req.query, options);
-  const { error: paramError, value: paramValue } = paramSchema.validate(req.params, options);
+  const { error: queryError, value: queryValue } = querySchema.validate(
+    req.query,
+    validationOptions
+  );
+  const { error: paramError, value: paramValue } = paramSchema.validate(
+    req.params,
+    validationOptions
+  );
 
   if (queryError || paramError) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(queryError! || paramError));

@@ -50,7 +50,7 @@ export const getFollowList = (req: Request, res: Response, next: NextFunction) =
     addedAt: Joi.string().isoDate(),
   });
 
-  const { error, value } = schema.validate(req.query);
+  const { error, value } = schema.validate(req.query, validationOptions);
 
   if (error) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));
@@ -125,7 +125,7 @@ export const addFollow = (req: Request, res: Response, next: NextFunction) => {
     followingId: Joi.string().required(),
   });
 
-  const { error, value } = schema.validate(req.body);
+  const { error, value } = schema.validate(req.body, validationOptions);
 
   if (error) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));
@@ -144,7 +144,7 @@ export const removeFollow = (req: Request, res: Response, next: NextFunction) =>
     id: Joi.string().required(),
   });
 
-  const { error, value } = schema.validate(req.params);
+  const { error, value } = schema.validate(req.params, validationOptions);
 
   if (error) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));
