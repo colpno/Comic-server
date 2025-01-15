@@ -7,7 +7,7 @@ const rateLimiter = (options?: Parameters<typeof rateLimit>[0]) =>
   rateLimit({
     ...options,
     windowMs: options?.windowMs ?? 1000, // 1 second
-    limit: options?.limit ?? 3, // 3 requests per second
+    limit: options?.limit ?? 4, // 4 requests per second
   });
 
 export default rateLimiter;
