@@ -2,6 +2,7 @@ import { FilterQuery } from 'mongoose';
 
 import { FollowModel } from '../models';
 import { GetRequestArgs } from '../types/api.type';
+import { Comic } from '../types/comic.type';
 import { Follow } from '../types/follow.type';
 import { toObjectId } from '../utils/converter.util';
 import Pipeline from '../utils/Pipeline.util';
@@ -11,6 +12,13 @@ const filterToObjectId = (filter: FilterQuery<Follow>) => {
   if (filter.follower) filter.follower = toObjectId(`${filter.follower}`);
 };
 
+const projectFields = <T extends string>(projectionString: T) => {
+  projectionString = projectionString.replace('id', '_id') as T;
+  const allExclusion = projectionString.split(' ').every((field) => field.startsWith('-'));
+  if (allExclusion) return `${projectionString} -follower` as T;
+  return projectionString;
+};
+
 export const _Pipeline = new Pipeline();
 
 export const getFollows = async ({
@@ -18,7 +26,7 @@ export const getFollows = async ({
   _limit = 1,
   ...filter
 }: GetRequestArgs<Follow> & FilterQuery<Follow>) => {
-  if (filter._select) filter._select += ' -follower';
+  if (filter._select) filter._select = projectFields(filter._select);
   else filter._select = '-follower';
 
   const pipeline = _Pipeline.generate(filter);
@@ -39,6 +47,23 @@ export const getFollows = async ({
     pageSize: result.length,
     data: result,
   };
+};
+
+export const getFollow = async (
+  filter: Omit<GetRequestArgs<Follow>, '_limit' | '_page'> & FilterQuery<Follow>
+) => {
+  if (filter._select) filter._select = projectFields(filter._select);
+  else filter._select = '-follower';
+
+  const pipeline = _Pipeline.generate(filter);
+  pipeline.push({ $limit: 1 });
+
+  const results = await FollowModel.aggregate<Omit<Follow<string, string | Comic>, 'follower'>>(
+    pipeline
+  );
+  console.log('file: follow.service.ts:66 ~ results:', results);
+
+  return results[0] || null;
 };
 
 export const createFollow = async (follow: Pick<Follow, 'follower' | 'following'>) => {

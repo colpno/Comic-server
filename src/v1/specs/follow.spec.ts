@@ -1,7 +1,12 @@
 import { Tspec } from 'tspec';
 
 import { BASE_ENDPOINT } from '../constants/common.constant';
-import { AddFollow, getFollowList, removeFollow } from '../controllers/follow.controller';
+import {
+  AddFollow,
+  getFollow,
+  getFollowList,
+  removeFollow,
+} from '../controllers/follow.controller';
 
 export type FollowApiSpec = Tspec.DefineApiSpec<{
   basePath: `${typeof BASE_ENDPOINT}/follows`;
@@ -24,6 +29,12 @@ export type FollowApiSpec = Tspec.DefineApiSpec<{
         summary: 'Remove a follow';
         handler: typeof removeFollow;
       };
+    };
+  };
+  '/:comicId': {
+    get: {
+      summary: 'Get a follow';
+      handler: typeof getFollow;
     };
   };
 }>;

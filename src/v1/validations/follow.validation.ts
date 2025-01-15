@@ -3,10 +3,16 @@ import { Schema } from 'joi';
 
 import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
-import { AddFollow, GetFollowList, RemoveFollow } from '../controllers/follow.controller';
+import {
+  AddFollow,
+  GetFollow,
+  GetFollowList,
+  RemoveFollow,
+} from '../controllers/follow.controller';
 import { Follow } from '../types/follow.type';
 import { MangaListQuery } from '../types/mangadex.type';
-import { normalOperatorsSchema, processValidationError } from '../utils/validation.util';
+import { processValidationError } from '../utils/validation.util';
+import { validationOptions } from './';
 import { mangadexMangaListSchema } from './variables';
 
 type GetFollowListSchema = Record<keyof Parameters<GetFollowList>[0]['query'], Schema>;
@@ -22,6 +28,7 @@ export const getFollowList = (req: Request, res: Response, next: NextFunction) =
   ];
 
   const schema = Joi.object<GetFollowListSchema>({
+    _select: Joi.string(),
     _embed: Joi.alternatives().try(
       Joi.string().valid('following'),
       Joi.object({
@@ -39,11 +46,7 @@ export const getFollowList = (req: Request, res: Response, next: NextFunction) =
     createdAt: Joi.string().isoDate(),
     updatedAt: Joi.string().isoDate(),
     follower: Joi.string(),
-    following: Joi.object({
-      all: normalOperatorsSchema.all,
-      in: normalOperatorsSchema.in,
-      nin: normalOperatorsSchema.nin,
-    }),
+    following: Joi.string(),
     addedAt: Joi.string().isoDate(),
   });
 
@@ -55,6 +58,62 @@ export const getFollowList = (req: Request, res: Response, next: NextFunction) =
 
   req.originalQuery = req.query;
   req.query = value;
+
+  next();
+};
+
+type GetFollowSchema = {
+  query: Record<keyof Parameters<GetFollow>[0]['query'], Schema>;
+  params: Record<keyof Parameters<GetFollow>[0]['params'], Schema>;
+};
+
+export const getFollow = (req: Request, res: Response, next: NextFunction) => {
+  const allowedComicEmbeds: MangaListQuery['includes'] = [
+    'author',
+    'artist',
+    'manga',
+    'cover_art',
+    'tag',
+  ];
+
+  const paramSchema = Joi.object<GetFollowSchema['params']>({
+    following: Joi.string().required(),
+  });
+
+  const querySchema = Joi.object<GetFollowSchema['query']>({
+    _select: Joi.string(),
+    _embed: Joi.alternatives().try(
+      Joi.string().valid('following'),
+      Joi.object({
+        path: Joi.string().valid('following').required(),
+        match: Joi.object(mangadexMangaListSchema),
+        populate: Joi.string().valid(...allowedComicEmbeds),
+      })
+    ),
+    createdAt: Joi.string().isoDate(),
+    updatedAt: Joi.string().isoDate(),
+    follower: Joi.string(),
+    following: Joi.string(),
+    addedAt: Joi.string().isoDate(),
+  });
+
+  const { error: queryError, value: queryValue } = querySchema.validate(
+    req.query,
+    validationOptions
+  );
+  const { error: paramError, value: paramValue } = paramSchema.validate(
+    req.params,
+    validationOptions
+  );
+
+  if (queryError || paramError) {
+    return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(queryError! || paramError));
+  }
+
+  req.originalParams = req.params;
+  req.originalQuery = req.query;
+  req.query = queryValue;
+  req.params = paramValue;
 
   next();
 };

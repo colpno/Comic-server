@@ -10,7 +10,7 @@ import { MangaListQuery } from '../types/mangadex.type';
 import { generatePaginationMeta } from '../utils/meta.util';
 import { GetComics } from './comic.controller';
 
-type GetFollowListQuery = Omit<GetRequestArgs<Follow>, '_embed' | '_select' | 'id'> & {
+type GetFollowListQuery = Omit<GetRequestArgs<Follow>, '_embed' | 'id'> & {
   _embed?:
     | 'following'
     | {
@@ -67,6 +67,49 @@ export const getFollowList: GetFollowList = async (req, res, next) => {
     }
 
     return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+type GetFollowQuery = Partial<
+  Omit<Follow, 'following' | 'follower'> &
+    Pick<GetRequestArgs<Follow>, '_select'> & {
+      follower?: string;
+      following?: string;
+      _embed?: GetFollowListQuery['_embed'];
+    }
+>;
+type GetFollowReturnType = SuccessfulResponse<Omit<Follow<string, Comic | string>, 'follower'>>;
+export type GetFollow = RequestHandler<
+  { following: string },
+  GetFollowReturnType,
+  null,
+  GetFollowQuery
+>;
+
+export const getFollow: GetFollow = async (req, res, next) => {
+  try {
+    const { _embed, ...query } = req.query;
+
+    const follow = await followService.getFollow(query);
+
+    // Embed following
+    if (_embed) {
+      const { match = {}, populate } = typeof _embed !== 'string' ? _embed : {};
+
+      // Get comics with ids
+      const { data: comics } = await comicService.getComicList({
+        ...match,
+        ids: [follow.following as string],
+        _embed: populate,
+      });
+
+      // Replace following with comic data
+      follow.following = comics[0];
+    }
+
+    return res.json({ data: follow });
   } catch (error) {
     next(error);
   }
