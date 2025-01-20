@@ -2,7 +2,7 @@ import qs from 'qs';
 import request from 'supertest';
 
 import app from '../../app';
-import { COOKIE_NAME_ACCESS_TOKEN, COOKIE_NAME_REFRESH_TOKEN } from '../configs/common.conf';
+import { COOKIE_NAME_REFRESH_TOKEN } from '../configs/common.conf';
 import { BASE_ENDPOINT } from '../constants/common.constant';
 import { SuccessfulResponse } from '../types/api.type';
 import { serializeObject } from '../utils/console.util';
@@ -67,13 +67,14 @@ export const login = async (credentials: Credentials = defaultCredentials) => {
       .set('X-CSRF-Token', csrfToken)
       .send(credentials);
 
+    const accessToken = loginResponse.body.data?.accessToken as string;
+
     const cookies = loginResponse.headers['set-cookie'] as unknown as string[] | undefined;
-    const accessTokenCookie = cookies?.find((cookie) => cookie.includes(COOKIE_NAME_ACCESS_TOKEN));
     const refreshTokenCookie = cookies?.find((cookie) =>
       cookie.includes(COOKIE_NAME_REFRESH_TOKEN)
     );
 
-    if (!accessTokenCookie) {
+    if (!accessToken) {
       throw new Error500('No access token is set in cookie');
     }
     if (!refreshTokenCookie) {
@@ -83,10 +84,8 @@ export const login = async (credentials: Credentials = defaultCredentials) => {
     return {
       csrfToken,
       csrfTokenCookie,
-      accessTokenCookie,
+      accessToken,
       refreshTokenCookie,
-      /** Contains access token and refresh token. */
-      authCookies: [accessTokenCookie, refreshTokenCookie],
     };
   } catch (error) {
     console.error(serializeObject(error));

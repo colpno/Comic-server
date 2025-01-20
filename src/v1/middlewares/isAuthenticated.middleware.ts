@@ -1,12 +1,17 @@
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 
-import { ACCESS_TOKEN_SECRET, COOKIE_NAME_ACCESS_TOKEN } from '../configs/common.conf';
+import { ACCESS_TOKEN_SECRET } from '../configs/common.conf';
 import { JWTPayload } from '../types/common.type';
-import { Error401, Error403 } from '../utils/error.utils';
+import { Error400, Error401, Error403 } from '../utils/error.utils';
 
 const isAuthenticated: RequestHandler = (req, _, next) => {
-  const accessToken = req.cookies?.[COOKIE_NAME_ACCESS_TOKEN];
+  const authorization = req.header('Authorization')?.split(' ');
+  const [authorizationType, accessToken] = authorization || [];
+
+  if (authorizationType !== 'Bearer') {
+    throw new Error400('Invalid Authorization Type');
+  }
 
   if (!accessToken) {
     throw new Error401('Login is required');

@@ -15,23 +15,20 @@ afterAll((done) => {
 });
 
 describe('Follows', () => {
-  let csrfToken: string, csrfTokenCookie: string[], authCookies: string[];
+  let csrfToken: string, csrfTokenCookie: string[], accessToken: string, authCookies: string[];
 
   beforeAll(async () => {
     const response = await login();
     csrfToken = response.csrfToken;
     csrfTokenCookie = response.csrfTokenCookie;
-    authCookies = response.authCookies;
-
-    console.log('file: follow.test.ts:36 ~ authCookies:', authCookies);
-    console.log('file: follow.test.ts:36 ~ csrfTokenCookie:', csrfTokenCookie);
-    console.log('file: follow.test.ts:36 ~ csrfToken:', csrfToken);
+    accessToken = response.accessToken;
+    authCookies = [response.refreshTokenCookie];
   });
 
   it('should return a list of at most 100 following', async () => {
     const url = getEndpoint();
 
-    const response = await request(app).get(url).set('Cookie', authCookies);
+    const response = await request(app).get(url).set('Authorization', `Bearer ${accessToken}`);
 
     expect(response.status).toBe(200);
   });
@@ -46,6 +43,7 @@ describe('Follows', () => {
 
     const response = await request(app)
       .get(url)
+      .set('Authorization', `Bearer ${accessToken}`)
       .set('Cookie', cookies)
       .set('X-CSRF-Token', csrfToken)
       .send(body);
@@ -63,6 +61,7 @@ describe('Follows', () => {
 
   //   const response = await request(app)
   //     .get(url)
+  // .set('Authorization', `Bearer ${accessToken}`)
   //     .set('Cookie', cookies)
   //     .set('X-CSRF-Token', csrfToken)
   //     .send(body);
@@ -77,6 +76,7 @@ describe('Follows', () => {
 
     const response = await request(app)
       .get(url)
+      .set('Authorization', `Bearer ${accessToken}`)
       .set('Cookie', cookies)
       .set('X-CSRF-Token', csrfToken);
 
