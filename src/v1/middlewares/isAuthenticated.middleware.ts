@@ -7,12 +7,16 @@ import { Error400, Error401, Error403 } from '../utils/error.utils';
 
 const isAuthenticated: RequestHandler = (req, _, next) => {
   const authorization = req.header('Authorization')?.split(' ');
-  const [authorizationType, accessToken] = authorization || [];
+
+  if (!authorization) {
+    throw new Error401('Login is required');
+  }
+
+  const [authorizationType, accessToken] = authorization;
 
   if (authorizationType !== 'Bearer') {
     throw new Error400('Invalid Authorization Type');
   }
-
   if (!accessToken) {
     throw new Error401('Login is required');
   }
