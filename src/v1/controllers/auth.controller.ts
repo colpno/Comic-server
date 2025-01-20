@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken';
 import { HTTP_204_NO_CONTENT } from '../../constants/httpCode.constant';
 import {
   ACCESS_TOKEN_SECRET,
-  COOKIE_NAME_ACCESS_TOKEN,
   COOKIE_NAME_REFRESH_TOKEN,
   REFRESH_TOKEN_SECRET,
 } from '../configs/common.conf';
@@ -36,7 +35,10 @@ interface LoginBody {
   password: string;
   rememberMe?: boolean;
 }
-export type Login = RequestHandler<{}, unknown, LoginBody>;
+type LoginReturnType = SuccessfulResponse<{
+  accessToken: string;
+}>;
+export type Login = RequestHandler<{}, LoginReturnType, LoginBody>;
 
 export const login: Login = async (req, res, next) => {
   try {
@@ -63,14 +65,14 @@ export const login: Login = async (req, res, next) => {
       expiresIn: rememberMe ? MS_1DAY : MS_1MONTH,
     });
 
+    await updateUser({ _id: user.id }, { refreshToken });
+
     res.cookie(COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookieConfig);
-    res.cookie(COOKIE_NAME_ACCESS_TOKEN, accessToken, cookieConfig);
-    return res.sendStatus(HTTP_204_NO_CONTENT);
-    // return res.json({
-    //   data: {
-    //     id: jwtPayload.userId,
-    //   },
-    // });
+    return res.json({
+      data: {
+        accessToken,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -79,7 +81,6 @@ export const login: Login = async (req, res, next) => {
 export const logout: RequestHandler = async (req, res, next) => {
   const clearCookies = () => {
     res.clearCookie(COOKIE_NAME_REFRESH_TOKEN, clearCookieConfig);
-    res.clearCookie(COOKIE_NAME_ACCESS_TOKEN, clearCookieConfig);
   };
 
   try {
