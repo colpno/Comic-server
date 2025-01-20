@@ -22,7 +22,7 @@ export const mangadexMangaListSchema: Record<
   hasAvailableChapters: Joi.string().valid('true', 'false'),
   includedTags: Joi.array().items(Joi.string()),
   includedTagsMode: Joi.string().valid(...allowedTagMode),
-  ids: Joi.array().items(Joi.string()),
+  ids: Joi.array().items(Joi.string()).max(100),
   excludedTags: Joi.array().items(Joi.string()),
   excludedTagsMode: Joi.string().valid(...allowedTagMode),
 };
