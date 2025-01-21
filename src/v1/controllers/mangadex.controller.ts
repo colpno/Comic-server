@@ -75,7 +75,7 @@ export const getMangaList = async (query: MangaListQuery) => {
 
 export const getMangaByTitle = async (
   titleQuery: string,
-  query: Pick<MangaListQuery, 'includes'>
+  query?: Pick<MangaListQuery, 'includes'>
 ) => {
   try {
     const title = titleQuery.replace(/-/g, ' ');
@@ -104,9 +104,9 @@ export const getMangaByTitle = async (
   }
 };
 
-export const getChaptersByMangaId = async (mangaId: string, query: MangaFeedQuery) => {
+export const getChaptersByMangaId = async (mangaId: string, query?: MangaFeedQuery) => {
   try {
-    const { limit, offset, order, include: includes, exclude: excludes } = query;
+    const { limit, offset, order, include: includes, exclude: excludes } = query || {};
     const url = getMangaChaptersUrl(mangaId);
 
     const includeParam = includes?.reduce((acc, include) => {
