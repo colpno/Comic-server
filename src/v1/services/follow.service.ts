@@ -61,7 +61,6 @@ export const getFollow = async (
   const results = await FollowModel.aggregate<Omit<Follow<string, string | Comic>, 'follower'>>(
     pipeline
   );
-  console.log('file: follow.service.ts:66 ~ results:', results);
 
   return results[0] || null;
 };
