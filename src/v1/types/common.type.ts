@@ -11,6 +11,6 @@ export interface MongoDocFields {
 }
 export type MongoDoc<T> = MongoDocFields & T;
 
-export interface JWTPayload {
+export interface JWTPayload extends Record<string, unknown> {
   userId: string;
 }

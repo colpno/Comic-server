@@ -18,14 +18,22 @@ if (!process.env.COOKIE_SECRET) {
 if (!process.env.ACCESS_TOKEN_SECRET) {
   throw new Error500('ACCESS_TOKEN_SECRET is not provided');
 }
+if (!process.env.ACCESS_TOKEN_ENCRYPT_SECRET) {
+  throw new Error500('ACCESS_TOKEN_SECRET is not provided');
+}
 if (!process.env.REFRESH_TOKEN_SECRET) {
+  throw new Error500('REFRESH_TOKEN_SECRET is not provided');
+}
+if (!process.env.REFRESH_TOKEN_ENCRYPT_SECRET) {
   throw new Error500('REFRESH_TOKEN_SECRET is not provided');
 }
 
 export const CSRF_SECRET = process.env.CSRF_SECRET;
 export const COOKIE_SECRET = process.env.COOKIE_SECRET;
 export const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
+export const ACCESS_TOKEN_ENCRYPT_SECRET = process.env.ACCESS_TOKEN_ENCRYPT_SECRET;
 export const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
+export const REFRESH_TOKEN_ENCRYPT_SECRET = process.env.REFRESH_TOKEN_ENCRYPT_SECRET;
 
 if (APP_ENVIRONMENT === 'production') {
   if (!process.env.COOKIE_DOMAIN) {

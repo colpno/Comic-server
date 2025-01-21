@@ -1,10 +1,11 @@
 import { RequestHandler } from 'express';
-import jwt from 'jsonwebtoken';
 
 import { HTTP_204_NO_CONTENT } from '../../constants/httpCode.constant';
 import {
+  ACCESS_TOKEN_ENCRYPT_SECRET,
   ACCESS_TOKEN_SECRET,
   COOKIE_NAME_REFRESH_TOKEN,
+  REFRESH_TOKEN_ENCRYPT_SECRET,
   REFRESH_TOKEN_SECRET,
 } from '../configs/common.conf';
 import { clearCookieConfig, cookieConfig } from '../configs/cookie.conf';
@@ -12,13 +13,13 @@ import { createUser, getUser, updateUser } from '../services/user.service';
 import { SuccessfulResponse } from '../types/api.type';
 import { JWTPayload } from '../types/common.type';
 import { User } from '../types/user.type';
-import { toMS } from '../utils/converter.util';
 import { generateSalt, hashString } from '../utils/crypto.util';
 import { Error400, Error403, Error404 } from '../utils/error.utils';
+import { decryptAndVerifyJWT, signAndEncryptJWT } from '../utils/jwt.util';
 
-const MS_15MINS = toMS(15, 'minutes');
-const MS_1DAY = toMS(1, 'day');
-const MS_1MONTH = toMS(1, 'month');
+const _15MINS = '15m';
+const _1DAY = '1d';
+const _1MONTH = '4w';
 
 export type GenerateCSRFToken = RequestHandler<{}, Pick<SuccessfulResponse<string>, 'data'>>;
 
@@ -60,10 +61,19 @@ export const login: Login = async (req, res, next) => {
     const jwtPayload: JWTPayload = {
       userId: user.id,
     };
-    const accessToken = jwt.sign(jwtPayload, ACCESS_TOKEN_SECRET, { expiresIn: MS_15MINS });
-    const refreshToken = jwt.sign(jwtPayload, REFRESH_TOKEN_SECRET, {
-      expiresIn: rememberMe ? MS_1DAY : MS_1MONTH,
-    });
+
+    const accessToken = await signAndEncryptJWT(
+      jwtPayload,
+      ACCESS_TOKEN_SECRET,
+      ACCESS_TOKEN_ENCRYPT_SECRET,
+      { expiresIn: _15MINS }
+    );
+    const refreshToken = await signAndEncryptJWT(
+      jwtPayload,
+      REFRESH_TOKEN_SECRET,
+      REFRESH_TOKEN_ENCRYPT_SECRET,
+      { expiresIn: rememberMe ? _1DAY : _1MONTH }
+    );
 
     await updateUser({ _id: user.id }, { refreshToken });
 
@@ -208,20 +218,24 @@ export const refreshAccessToken: RequestHandler = async (req, res, next) => {
     }
 
     // Verify the refresh token
-    jwt.verify(refreshToken, REFRESH_TOKEN_SECRET, (err: unknown, decoded: unknown) => {
-      if (err) {
-        throw new Error403('Invalid refresh token');
-      }
+    const payload = await decryptAndVerifyJWT<JWTPayload>(
+      refreshToken,
+      REFRESH_TOKEN_ENCRYPT_SECRET,
+      REFRESH_TOKEN_SECRET
+    );
 
-      // Create a new access token
-      const decodedPayload = decoded as JWTPayload;
-      const payload = {
-        userId: decodedPayload.userId,
-      };
-      const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: MS_15MINS });
+    // Create a new access token
+    const newPayload: JWTPayload = {
+      userId: payload.userId,
+    };
+    const accessToken = await signAndEncryptJWT(
+      newPayload,
+      ACCESS_TOKEN_ENCRYPT_SECRET,
+      ACCESS_TOKEN_SECRET,
+      { expiresIn: _15MINS }
+    );
 
-      return res.json({ data: accessToken });
-    });
+    return res.json({ data: accessToken });
   } catch (error) {
     next(error);
   }
