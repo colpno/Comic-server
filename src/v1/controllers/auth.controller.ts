@@ -19,7 +19,6 @@ import { decryptAndVerifyJWT, signAndEncryptJWT } from '../utils/jwt.util';
 
 const _15MINS = '15m';
 const _1DAY = '1d';
-const _1MONTH = '4w';
 
 export type GenerateCSRFToken = RequestHandler<{}, Pick<SuccessfulResponse<string>, 'data'>>;
 
@@ -72,7 +71,7 @@ export const login: Login = async (req, res, next) => {
       jwtPayload,
       REFRESH_TOKEN_SECRET,
       REFRESH_TOKEN_ENCRYPT_SECRET,
-      { expiresIn: rememberMe ? _1DAY : _1MONTH }
+      { expiresIn: rememberMe ? _1DAY : '50y' }
     );
 
     await updateUser({ _id: user.id }, { refreshToken });
