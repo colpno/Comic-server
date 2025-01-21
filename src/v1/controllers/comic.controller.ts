@@ -94,7 +94,7 @@ export const getReadingChapter: GetReadingChapter = async (req, res, next) => {
     const { chapter: chapterNumber, title } = req.params;
 
     // Get comic by title
-    const comic = await getMangaByTitle(title);
+    const comic = await getMangaByTitle(title, { includes: ['cover_art'] });
     if (!comic) {
       throw new Error400('Comic not found');
     }
