@@ -1,11 +1,13 @@
 import { RequestHandler } from 'express';
+import { errors } from 'jose';
 
 import { ACCESS_TOKEN_ENCRYPT_SECRET, ACCESS_TOKEN_SECRET } from '../configs/common.conf';
+import { refreshAccessToken } from '../controllers/auth.controller';
 import { JWTPayload } from '../types/common.type';
 import { Error400, Error401 } from '../utils/error.utils';
 import { decryptAndVerifyJWT } from '../utils/jwt.util';
 
-const isAuthenticated: RequestHandler = async (req, _, next) => {
+const isAuthenticated: RequestHandler = async (req, res, next) => {
   try {
     const authorization = req.header('Authorization')?.split(' ');
 
@@ -32,7 +34,11 @@ const isAuthenticated: RequestHandler = async (req, _, next) => {
 
     next();
   } catch (error) {
-    next(error);
+    if (error instanceof errors.JWTExpired) {
+      refreshAccessToken(req, res, next);
+    } else {
+      next(error);
+    }
   }
 };
 
