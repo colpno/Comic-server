@@ -3,7 +3,7 @@ import { Schema } from 'joi';
 
 import { HTTP_400_BAD_REQUEST } from '../../constants/httpCode.constant';
 import { Joi } from '../configs/joi.conf';
-import { GetComic, GetComics } from '../controllers/comic.controller';
+import { GetComic, GetComics, GetReadingChapter } from '../controllers/comic.controller';
 import { MangaListQuery } from '../types/mangadex.type';
 import { processValidationError, validateGetRequest } from '../utils/validation.util';
 import { validationOptions } from './';
@@ -96,6 +96,31 @@ export const getComicByTitle = (req: Request, res: Response, next: NextFunction)
   req.originalParams = req.params;
   req.originalQuery = req.query;
   req.query = queryValue;
+  req.params = paramValue;
+
+  next();
+};
+
+type GetReadingChapterSchema = {
+  params: Record<keyof Parameters<GetReadingChapter>[0]['params'], Schema>;
+};
+
+export const getReadingChapter = (req: Request, res: Response, next: NextFunction) => {
+  const paramSchema = Joi.object<GetReadingChapterSchema['params']>({
+    chapter: Joi.string().required(),
+    title: Joi.string().required(),
+  });
+
+  const { error: paramError, value: paramValue } = paramSchema.validate(
+    req.params,
+    validationOptions
+  );
+
+  if (paramError) {
+    return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(paramError));
+  }
+
+  req.originalParams = req.params;
   req.params = paramValue;
 
   next();
