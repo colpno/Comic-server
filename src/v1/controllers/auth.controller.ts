@@ -1,4 +1,5 @@
 import { RequestHandler } from 'express';
+import { errors } from 'jose';
 
 import { HTTP_204_NO_CONTENT } from '../../constants/httpCode.constant';
 import {
@@ -14,7 +15,7 @@ import { SuccessfulResponse } from '../types/api.type';
 import { JWTPayload } from '../types/common.type';
 import { User } from '../types/user.type';
 import { generateSalt, hashString } from '../utils/crypto.util';
-import { Error400, Error403, Error404 } from '../utils/error.utils';
+import { Error400, Error401, Error403, Error404 } from '../utils/error.utils';
 import { decryptAndVerifyJWT, signAndEncryptJWT } from '../utils/jwt.util';
 
 const _15MINS = '15m';
@@ -216,16 +217,25 @@ export const refreshAccessToken: RequestHandler = async (req, res, next) => {
       throw new Error404('User not found');
     }
 
-    // Verify the refresh token
-    const payload = await decryptAndVerifyJWT<JWTPayload>(
-      refreshToken,
-      REFRESH_TOKEN_ENCRYPT_SECRET,
-      REFRESH_TOKEN_SECRET
-    );
+    let payload: JWTPayload;
+    try {
+      // Verify the refresh token
+      payload = await decryptAndVerifyJWT<JWTPayload>(
+        refreshToken,
+        REFRESH_TOKEN_ENCRYPT_SECRET,
+        REFRESH_TOKEN_SECRET
+      );
+    } catch (error) {
+      if (error instanceof errors.JWTExpired) {
+        throw new Error401('Login is required');
+      } else {
+        next(error);
+      }
+    }
 
     // Create a new access token
     const newPayload: JWTPayload = {
-      userId: payload.userId,
+      userId: payload!.userId,
     };
     const accessToken = await signAndEncryptJWT(
       newPayload,
