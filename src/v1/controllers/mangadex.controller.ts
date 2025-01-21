@@ -166,7 +166,7 @@ export const getChapterContent = async (chapterId: Chapter['id']) => {
 
     result.push({
       data: `${data.baseUrl}/data/${data.chapter.hash}/${image}`,
-      dataSaver: `${data.baseUrl}/data/${data.chapter.hash}/${compressed}`,
+      dataSaver: `${data.baseUrl}/data-saver/${data.chapter.hash}/${compressed}`,
     });
   }
 
