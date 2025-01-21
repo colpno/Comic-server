@@ -8,3 +8,4 @@ export const HTTP_403_FORBIDDEN = 403;
 export const HTTP_404_NOT_FOUND = 404;
 
 export const HTTP_500_SERVER_ERROR = 500;
+export const HTTP_503_SERVER_UNAVAILABLE = 503;

@@ -4,3 +4,4 @@ export * as comicController from './comic.controller';
 export * as followController from './follow.controller';
 export * as genreController from './genre.controller';
 export * as mangadexController from './mangadex.controller';
+export * as nonResourcesController from './nonResources.controller';
