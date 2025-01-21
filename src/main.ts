@@ -1,6 +1,6 @@
 import app from './app';
 import { PORT } from './configs/app.conf';
-import { MongoDB } from './databases/MongoDB.database';
+import MongoDB from './databases/MongoDB.database';
 
 console.log('Connecting to database...');
 
