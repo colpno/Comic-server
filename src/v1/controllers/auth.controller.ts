@@ -202,7 +202,9 @@ export const resetPassword: ResetPassword = async (req, res, next) => {
   }
 };
 
-export const refreshAccessToken: RequestHandler = async (req, res, next) => {
+type RefreshAccessToken = RequestHandler<{}, SuccessfulResponse<{ accessToken: string }>>;
+
+export const refreshAccessToken: RefreshAccessToken = async (req, res, next) => {
   try {
     const refreshToken = req.cookies?.[COOKIE_NAME_REFRESH_TOKEN];
 
@@ -226,6 +228,7 @@ export const refreshAccessToken: RequestHandler = async (req, res, next) => {
         REFRESH_TOKEN_SECRET
       );
     } catch (error) {
+      // Refresh token is expired
       if (error instanceof errors.JWTExpired) {
         throw new Error401('Login is required');
       } else {
@@ -244,7 +247,11 @@ export const refreshAccessToken: RequestHandler = async (req, res, next) => {
       { expiresIn: _15MINS }
     );
 
-    return res.json({ data: accessToken });
+    return res.json({
+      data: {
+        accessToken: accessToken,
+      },
+    });
   } catch (error) {
     next(error);
   }
