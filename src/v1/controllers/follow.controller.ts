@@ -91,9 +91,13 @@ export type GetFollow = RequestHandler<
 
 export const getFollow: GetFollow = async (req, res, next) => {
   try {
+    const { following } = req.params;
     const { _embed, ...query } = req.query;
 
-    const follow = await followService.getFollow(query);
+    const follow = await followService.getFollow({
+      ...query,
+      following,
+    });
 
     // Embed following
     if (_embed) {
