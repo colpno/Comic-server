@@ -9,7 +9,7 @@ export interface MongoDocFields {
   createdAt: string;
   updatedAt: string;
 }
-export type MongoDoc<T> = MongoDocFields & T;
+export type MongoDoc<T> = MongoDocFields & Omit<T, 'id' | 'createdAt' | 'updatedAt'>;
 
 export interface JWTPayload extends Record<string, unknown> {
   userId: string;
