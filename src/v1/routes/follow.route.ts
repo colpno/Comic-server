@@ -5,14 +5,12 @@ import { followValidator } from '../validations';
 
 const router = Router();
 
-router.get('/', followValidator.getFollowList, followController.getFollowList);
 router.get('/:following', followValidator.getFollow, followController.getFollow);
+router.get('/', followValidator.getFollowList, followController.getFollowList);
 
-router.post('/', followController.addFollow);
+router.post('/', followValidator.addFollow, followController.addFollow);
 
-router.put('/', followController.addFollow);
-
-router.delete('/:id', followController.removeFollow);
+router.delete('/:id', followValidator.removeFollow, followController.removeFollow);
 
 const followRouter = router;
 export default followRouter;
