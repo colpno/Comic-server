@@ -7,6 +7,7 @@ import { GetRequestArgs, SuccessfulResponse } from '../types/api.type';
 import { Comic } from '../types/comic.type';
 import { Follow } from '../types/follow.type';
 import { MangaListQuery } from '../types/mangadex.type';
+import { toObjectId } from '../utils/converter.util';
 import { generatePaginationMeta } from '../utils/meta.util';
 import { GetComics } from './comic.controller';
 
@@ -138,10 +139,9 @@ export type RemoveFollow = RequestHandler<{ id: string }, unknown, null>;
 
 export const removeFollow: RemoveFollow = async (req, res, next) => {
   try {
-    const { id: idToRemove } = req.params;
-    const { userId } = req.user!;
+    const { id } = req.params;
 
-    await followService.removeFollow(userId, idToRemove);
+    await followService.removeFollow({ _id: toObjectId(id) });
 
     return res.sendStatus(HTTP_200_OK);
   } catch (error) {

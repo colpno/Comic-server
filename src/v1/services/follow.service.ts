@@ -4,13 +4,7 @@ import { FollowModel } from '../models';
 import { GetRequestArgs } from '../types/api.type';
 import { Comic } from '../types/comic.type';
 import { Follow } from '../types/follow.type';
-import { toObjectId } from '../utils/converter.util';
 import Pipeline from '../utils/Pipeline.util';
-
-const filterToObjectId = (filter: FilterQuery<Follow>) => {
-  if (filter.id) filter.id = toObjectId(`${filter.id}`);
-  if (filter.follower) filter.follower = toObjectId(`${filter.follower}`);
-};
 
 const projectFields = <T extends string>(projectionString: T) => {
   projectionString = projectionString.replace('id', '_id') as T;
@@ -69,24 +63,6 @@ export const createFollow = async (follow: Pick<Follow, 'follower' | 'following'
   return await FollowModel.create(follow);
 };
 
-export const addFollow = async (
-  filter: FilterQuery<Follow>,
-  following: Follow['following'][number]
-) => {
-  filterToObjectId(filter);
-
-  return (await FollowModel.findOneAndUpdate(
-    filter,
-    {
-      $addToSet: { following },
-    },
-    { new: true }
-  )) as unknown as Follow;
-};
-
-export const removeFollow = async (followerId: Follow['follower'], idToRemove: string) => {
-  return await FollowModel.updateOne(
-    { follower: toObjectId(followerId) },
-    { $pull: { following: idToRemove } }
-  );
+export const removeFollow = async (filter: Parameters<typeof FollowModel.deleteOne>[0]) => {
+  return await FollowModel.deleteOne(filter);
 };

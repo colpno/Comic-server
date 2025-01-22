@@ -141,7 +141,7 @@ type RemoveFollowSchema = Record<keyof Parameters<RemoveFollow>[0]['params'], Sc
 
 export const removeFollow = (req: Request, res: Response, next: NextFunction) => {
   const schema = Joi.object<RemoveFollowSchema>({
-    id: Joi.string().required(),
+    id: Joi.string().isMongoObjectId().required(),
   });
 
   const { error, value } = schema.validate(req.params, validationOptions);
