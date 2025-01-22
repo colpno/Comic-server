@@ -8,7 +8,7 @@ const router = Router();
 
 router.get('/csrf-token', authController.generateCSRFToken);
 router.get('/logout', isAuthenticated, authController.logout);
-router.get('/refresh-token', authController.refreshAccessToken);
+router.get('/refresh-token', isAuthenticated, authController.refreshAccessToken);
 
 router.post('/login', authValidator.login, authController.login);
 router.post('/register', authValidator.register, authController.register);

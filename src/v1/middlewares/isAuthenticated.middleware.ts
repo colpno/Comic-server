@@ -30,6 +30,11 @@ const isAuthenticated: RequestHandler = async (req, res, next) => {
       ACCESS_TOKEN_SECRET
     );
 
+    // Is refresh token request and access token is still valid
+    if (req.url.includes('refresh-token')) {
+      return res.sendStatus(200);
+    }
+
     req.user = payload;
 
     next();
