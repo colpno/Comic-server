@@ -43,9 +43,7 @@ export const getFollows = async ({
   };
 };
 
-export const getFollow = async (
-  filter: Omit<GetRequestArgs<Follow>, '_limit' | '_page'> & FilterQuery<Follow>
-) => {
+export const getFollow = async (filter: Omit<GetRequestArgs<Follow>, '_limit' | '_page'>) => {
   if (filter._select) filter._select = projectFields(filter._select);
   else filter._select = '-follower';
 

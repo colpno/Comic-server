@@ -1,0 +1,1 @@
+{"version":3,"file":"MongoDB.database.js","sourceRoot":"","sources":["../../src/databases/MongoDB.database.ts"],"names":[],"mappings":";;;;;;;;;;;AAAA,uCAAkD;AAElD,4DAAuD;AAEvD,MAAqB,OAAO;IACpB,OAAO;;YACX,IAAI,CAAC,2BAAW;gBAAE,MAAM,IAAI,KAAK,CAAC,4BAA4B,CAAC,CAAC;YAEhE,MAAM,IAAA,kBAAW,EAAC,2BAAW,CAAC,CAAC;QACjC,CAAC;KAAA;CACF;AAND,0BAMC"}

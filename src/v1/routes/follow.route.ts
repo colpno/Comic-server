@@ -5,6 +5,7 @@ import { followValidator } from '../validations';
 
 const router = Router();
 
+// @ts-expect-error
 router.get('/:following', followValidator.getFollow, followController.getFollow);
 router.get('/', followValidator.getFollowList, followController.getFollowList);
 

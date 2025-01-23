@@ -1,0 +1,1 @@
+{"version":3,"file":"tspec.conf.js","sourceRoot":"","sources":["../../../src/v1/configs/tspec.conf.ts"],"names":[],"mappings":";;AAEA,kEAA2D;AAE3D,MAAM,WAAW,GAAyB;IACxC,aAAa,EAAE,CAAC,OAAO,6BAAW,aAAa,CAAC;IAChD,OAAO,EAAE;QACP,KAAK,EAAE,WAAW;QAClB,WAAW,EACT,+FAA+F;QACjG,OAAO,EAAE,GAAG,6BAAW,MAAM;KAC9B;CACF,CAAC;AAEF,kBAAe,WAAW,CAAC"}
