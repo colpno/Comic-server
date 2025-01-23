@@ -12,9 +12,6 @@ const config: Omit<CookieConfig, 'maxAge'> = {
   httpOnly: true,
   secure: APP_ENVIRONMENT === 'production',
   sameSite: APP_ENVIRONMENT === 'production' ? 'none' : 'lax',
-  domain: APP_ENVIRONMENT === 'production' ? COOKIE_DOMAIN : undefined,
-  // overwrite: true,
-  // signed: true,
 };
 
 export const cookieConfig: CookieConfig = {
