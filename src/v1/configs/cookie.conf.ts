@@ -1,6 +1,6 @@
 import { CookieOptions } from 'express';
 
-import { APP_ENVIRONMENT, COOKIE_DOMAIN } from './common.conf';
+import { APP_ENVIRONMENT } from './common.conf';
 
 type CookieConfig = Omit<CookieOptions, 'maxAge' | 'httpOnly' | 'sameSite'> & {
   maxAge: number;

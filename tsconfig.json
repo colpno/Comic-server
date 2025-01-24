@@ -1,13 +1,17 @@
 {
   "compilerOptions": {
+    "target": "es6",
     "module": "commonjs",
+    "outDir": "dist",
+    "moduleResolution": "node",
+
+    "sourceMap": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es6",
     "noImplicitAny": true,
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "outDir": "dist",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*", "src/types/*"]
