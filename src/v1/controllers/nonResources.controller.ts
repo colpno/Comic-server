@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { RequestHandler } from 'express';
 
+import { corsProxy } from '../services';
+
 type HealthStatus = 'ok' | 'maintenance';
 type HealthCheck = RequestHandler<{}, { status: HealthStatus }, null>;
 
@@ -16,4 +18,11 @@ export const healthCheck: HealthCheck = async (_req, res) => {
   } catch (error) {
     res.json({ status: 'maintenance' });
   }
+};
+
+export type Proxy = RequestHandler<{ proxyUrl: string }, void, null>;
+
+export const proxy: Proxy = async (req, res) => {
+  req.url = req.url.replace('/proxy/', '/'); // Strip '/proxy' from the front of the URL, else the proxy won't work.
+  corsProxy.emit('request', req, res);
 };

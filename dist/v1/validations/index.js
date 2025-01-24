@@ -23,11 +23,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validationOptions = exports.followValidator = exports.comicValidator = exports.chapterValidator = exports.authValidator = void 0;
+exports.validationOptions = exports.nonResourcesValidator = exports.followValidator = exports.comicValidator = exports.chapterValidator = exports.authValidator = void 0;
 exports.authValidator = __importStar(require("./auth.validation"));
 exports.chapterValidator = __importStar(require("./chapter.validation"));
 exports.comicValidator = __importStar(require("./comic.validation"));
 exports.followValidator = __importStar(require("./follow.validation"));
+exports.nonResourcesValidator = __importStar(require("./nonResources.validation"));
 exports.validationOptions = {
     stripUnknown: true,
 };
