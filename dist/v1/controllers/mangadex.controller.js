@@ -25,6 +25,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChapterContent = exports.getChaptersByMangaId = exports.getMangaByTitle = exports.getMangaList = exports.getTagIdList = exports.getTagList = void 0;
 const axios_1 = __importDefault(require("axios"));
+const app_conf_1 = require("../../configs/app.conf");
 const mangadex_service_1 = require("../services/mangadex.service");
 const BASE_URL = 'https://api.mangadex.org';
 const MANGA_URL = `${BASE_URL}/manga`;
@@ -135,16 +136,19 @@ const getChaptersByMangaId = (mangaId, query) => __awaiter(void 0, void 0, void 
 exports.getChaptersByMangaId = getChaptersByMangaId;
 const getChapterContent = (chapterId) => __awaiter(void 0, void 0, void 0, function* () {
     const url = getChapterImagesUrl(chapterId);
+    const proxyUrl = `${app_conf_1.HOST_URL}/proxy`;
     const response = yield axios_1.default.get(url);
     const { data } = response;
     const result = [];
     const imageLength = data.chapter.data.length;
     for (let i = 0; i < imageLength; i++) {
-        const image = data.chapter.data[i];
-        const compressed = data.chapter.dataSaver[i];
+        const imageFile = data.chapter.data[i];
+        const imageUrl = `${data.baseUrl}/data/${data.chapter.hash}/${imageFile}`;
+        const compressedFile = data.chapter.dataSaver[i];
+        const compressedUrl = `${data.baseUrl}/data-saver/${data.chapter.hash}/${compressedFile}`;
         result.push({
-            data: `${data.baseUrl}/data/${data.chapter.hash}/${image}`,
-            dataSaver: `${data.baseUrl}/data-saver/${data.chapter.hash}/${compressed}`,
+            data: `${proxyUrl}/${imageUrl}`,
+            dataSaver: `${proxyUrl}/${compressedUrl}`,
         });
     }
     return result;

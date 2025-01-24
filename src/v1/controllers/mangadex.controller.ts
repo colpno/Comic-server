@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import { HOST_URL } from '../../configs/app.conf';
 import { mangadexToChapter, mangadexToComic } from '../services/mangadex.service';
 import { Chapter } from '../types/chapter.type';
 import { Comic } from '../types/comic.type';
@@ -154,6 +155,7 @@ export const getChaptersByMangaId = async (mangaId: string, query?: MangaFeedQue
 
 export const getChapterContent = async (chapterId: Chapter['id']) => {
   const url = getChapterImagesUrl(chapterId);
+  const proxyUrl = `${HOST_URL}/proxy`;
 
   const response = await axios.get<ChapterImages>(url);
   const { data } = response;
@@ -161,12 +163,14 @@ export const getChapterContent = async (chapterId: Chapter['id']) => {
   const result: Chapter['content'] = [];
   const imageLength = data.chapter.data.length;
   for (let i = 0; i < imageLength; i++) {
-    const image = data.chapter.data[i];
-    const compressed = data.chapter.dataSaver[i];
+    const imageFile = data.chapter.data[i];
+    const imageUrl = `${data.baseUrl}/data/${data.chapter.hash}/${imageFile}`;
+    const compressedFile = data.chapter.dataSaver[i];
+    const compressedUrl = `${data.baseUrl}/data-saver/${data.chapter.hash}/${compressedFile}`;
 
     result.push({
-      data: `${data.baseUrl}/data/${data.chapter.hash}/${image}`,
-      dataSaver: `${data.baseUrl}/data-saver/${data.chapter.hash}/${compressed}`,
+      data: `${proxyUrl}/${imageUrl}`,
+      dataSaver: `${proxyUrl}/${compressedUrl}`,
     });
   }
 
