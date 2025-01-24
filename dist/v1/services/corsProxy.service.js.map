@@ -1,0 +1,1 @@
+{"version":3,"file":"corsProxy.service.js","sourceRoot":"","sources":["../../../src/v1/services/corsProxy.service.ts"],"names":[],"mappings":";;AAAA,0GAA0G;AAC1G,iDAA6C;AAE7C,MAAM,SAAS,GAAG,IAAA,4BAAY,EAAC;IAC7B,eAAe,EAAE,EAAE,EAAE,oBAAoB;IACzC,cAAc,EAAE,EAAE,EAAE,8BAA8B;IAClD,aAAa,EAAE,CAAC,QAAQ,EAAE,SAAS,EAAE,SAAS,CAAC,EAAE,6BAA6B;CAC/E,CAAC,CAAC;AAEH,kBAAe,SAAS,CAAC"}

@@ -22,10 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userService = exports.mangadexService = exports.followService = exports.comicService = void 0;
+exports.corsProxy = exports.userService = exports.mangadexService = exports.followService = exports.comicService = void 0;
 exports.comicService = __importStar(require("./comic.service"));
 exports.followService = __importStar(require("./follow.service"));
 exports.mangadexService = __importStar(require("./mangadex.service"));
 exports.userService = __importStar(require("./user.service"));
+var corsProxy_service_1 = require("./corsProxy.service");
+Object.defineProperty(exports, "corsProxy", { enumerable: true, get: function () { return __importDefault(corsProxy_service_1).default; } });
 //# sourceMappingURL=index.js.map
