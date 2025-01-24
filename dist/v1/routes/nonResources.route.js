@@ -17,13 +17,15 @@ const tspec_1 = require("tspec");
 const common_conf_1 = require("../configs/common.conf");
 const tspec_conf_1 = __importDefault(require("../configs/tspec.conf"));
 const controllers_1 = require("../controllers");
+const rateLimiter_middleware_1 = __importDefault(require("../middlewares/rateLimiter.middleware"));
+const converter_util_1 = require("../utils/converter.util");
 const validations_1 = require("../validations");
 const router = (0, express_1.Router)();
 (() => __awaiter(void 0, void 0, void 0, function* () {
     common_conf_1.APP_ENVIRONMENT === 'development' && router.use('/docs', yield (0, tspec_1.TspecDocsMiddleware)(tspec_conf_1.default));
 }))();
 router.get('/health', controllers_1.nonResourcesController.healthCheck);
-router.get('/proxy/:proxyUrl*', validations_1.nonResourcesValidator.proxy, controllers_1.nonResourcesController.proxy);
+router.get('/proxy/:proxyUrl*', (0, rateLimiter_middleware_1.default)({ limit: 200, windowMs: (0, converter_util_1.toMS)(30, 'seconds') }), validations_1.nonResourcesValidator.proxy, controllers_1.nonResourcesController.proxy);
 const nonResourcesRouter = router;
 exports.default = nonResourcesRouter;
 //# sourceMappingURL=nonResources.route.js.map

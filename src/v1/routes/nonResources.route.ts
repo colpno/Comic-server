@@ -4,6 +4,8 @@ import { TspecDocsMiddleware } from 'tspec';
 import { APP_ENVIRONMENT } from '../configs/common.conf';
 import tspecConfig from '../configs/tspec.conf';
 import { nonResourcesController } from '../controllers';
+import rateLimiter from '../middlewares/rateLimiter.middleware';
+import { toMS } from '../utils/converter.util';
 import { nonResourcesValidator } from '../validations';
 
 const router = Router();
@@ -13,7 +15,12 @@ const router = Router();
 })();
 
 router.get('/health', nonResourcesController.healthCheck);
-router.get('/proxy/:proxyUrl*', nonResourcesValidator.proxy, nonResourcesController.proxy);
+router.get(
+  '/proxy/:proxyUrl*',
+  rateLimiter({ limit: 200, windowMs: toMS(30, 'seconds') }),
+  nonResourcesValidator.proxy,
+  nonResourcesController.proxy
+);
 
 const nonResourcesRouter = router;
 export default nonResourcesRouter;

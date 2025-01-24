@@ -12,11 +12,10 @@ const rateLimiter_middleware_1 = __importDefault(require("./middlewares/rateLimi
 const routes_1 = __importDefault(require("./routes"));
 const v1App = (0, express_1.default)();
 v1App.use(middlewares_1.cors);
-v1App.use((0, rateLimiter_middleware_1.default)());
 v1App.use(middlewares_1.cookieCORS);
 v1App.use(middlewares_1.cookieParser);
 v1App.use((0, csurf_1.default)({ cookie: cookie_conf_1.cookieConfig }));
-v1App.use(common_constant_1.BASE_ENDPOINT, routes_1.default);
+v1App.use(common_constant_1.BASE_ENDPOINT, routes_1.default, (0, rateLimiter_middleware_1.default)());
 v1App.use(middlewares_1.errorHandler);
 exports.default = v1App;
 //# sourceMappingURL=index.js.map

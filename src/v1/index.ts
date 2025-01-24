@@ -10,12 +10,11 @@ import router from './routes';
 const v1App = express();
 
 v1App.use(cors);
-v1App.use(rateLimiter());
 v1App.use(cookieCORS);
 v1App.use(cookieParser);
 v1App.use(csurf({ cookie: cookieConfig }));
 
-v1App.use(BASE_ENDPOINT, router);
+v1App.use(BASE_ENDPOINT, router, rateLimiter());
 
 v1App.use(errorHandler);
 
