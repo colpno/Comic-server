@@ -31,7 +31,7 @@ const healthCheck = (_req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.healthCheck = healthCheck;
 const proxy = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    req.url = req.url.replace('/proxy/', '/'); // Strip '/proxy' from the front of the URL, else the proxy won't work.
+    req.url = decodeURIComponent(req.url).replace('/proxy/', '/'); // Strip '/proxy' from the front of the URL, else the proxy won't work.
     services_1.corsProxy.emit('request', req, res);
 });
 exports.proxy = proxy;

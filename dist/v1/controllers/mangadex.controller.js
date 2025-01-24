@@ -147,8 +147,8 @@ const getChapterContent = (chapterId) => __awaiter(void 0, void 0, void 0, funct
         const compressedFile = data.chapter.dataSaver[i];
         const compressedUrl = `${data.baseUrl}/data-saver/${data.chapter.hash}/${compressedFile}`;
         result.push({
-            data: `${proxyUrl}/${imageUrl}`,
-            dataSaver: `${proxyUrl}/${compressedUrl}`,
+            data: `${proxyUrl}/${encodeURIComponent(imageUrl)}`,
+            dataSaver: `${proxyUrl}/${encodeURIComponent(compressedUrl)}`,
         });
     }
     return result;

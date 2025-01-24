@@ -25,7 +25,7 @@ const router = (0, express_1.Router)();
     common_conf_1.APP_ENVIRONMENT === 'development' && router.use('/docs', yield (0, tspec_1.TspecDocsMiddleware)(tspec_conf_1.default));
 }))();
 router.get('/health', controllers_1.nonResourcesController.healthCheck);
-router.get('/proxy/:proxyUrl*', (0, rateLimiter_middleware_1.default)({ limit: 200, windowMs: (0, converter_util_1.toMS)(30, 'seconds') }), validations_1.nonResourcesValidator.proxy, controllers_1.nonResourcesController.proxy);
+router.get('/proxy/:proxyUrl', (0, rateLimiter_middleware_1.default)({ limit: 200, windowMs: (0, converter_util_1.toMS)(30, 'seconds') }), validations_1.nonResourcesValidator.proxy, controllers_1.nonResourcesController.proxy);
 const nonResourcesRouter = router;
 exports.default = nonResourcesRouter;
 //# sourceMappingURL=nonResources.route.js.map

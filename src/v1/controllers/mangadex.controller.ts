@@ -169,8 +169,8 @@ export const getChapterContent = async (chapterId: Chapter['id']) => {
     const compressedUrl = `${data.baseUrl}/data-saver/${data.chapter.hash}/${compressedFile}`;
 
     result.push({
-      data: `${proxyUrl}/${imageUrl}`,
-      dataSaver: `${proxyUrl}/${compressedUrl}`,
+      data: `${proxyUrl}/${encodeURIComponent(imageUrl)}`,
+      dataSaver: `${proxyUrl}/${encodeURIComponent(compressedUrl)}`,
     });
   }
 

@@ -23,6 +23,6 @@ export const healthCheck: HealthCheck = async (_req, res) => {
 export type Proxy = RequestHandler<{ proxyUrl: string }, void, null>;
 
 export const proxy: Proxy = async (req, res) => {
-  req.url = req.url.replace('/proxy/', '/'); // Strip '/proxy' from the front of the URL, else the proxy won't work.
+  req.url = decodeURIComponent(req.url).replace('/proxy/', '/'); // Strip '/proxy' from the front of the URL, else the proxy won't work.
   corsProxy.emit('request', req, res);
 };

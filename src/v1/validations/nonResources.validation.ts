@@ -10,21 +10,19 @@ import { validationOptions } from './';
 type ProxySchema = Record<keyof Parameters<Proxy>[0]['params'], Schema>;
 
 export const proxy = (req: Request, res: Response, next: NextFunction) => {
-  const reqParams: Parameters<Proxy>[0]['params'] = {
-    proxyUrl: `${req.params.proxyUrl}${req.params[0]}`,
-  };
+  req.params.proxyUrl = decodeURIComponent(req.params.proxyUrl);
 
   const schema = Joi.object<ProxySchema>({
     proxyUrl: Joi.string().uri().required(),
   });
 
-  const { error, value } = schema.validate(reqParams, validationOptions);
+  const { error, value } = schema.validate(req.params, validationOptions);
 
   if (error) {
     return res.status(HTTP_400_BAD_REQUEST).json(processValidationError(error));
   }
 
-  req.originalParams = reqParams;
+  req.originalParams = req.params;
   req.params = value;
 
   next();
