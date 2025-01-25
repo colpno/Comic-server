@@ -15,11 +15,23 @@ import { SuccessfulResponse } from '../types/api.type';
 import { JWTPayload } from '../types/common.type';
 import { User } from '../types/user.type';
 import { generateSalt, hashString } from '../utils/crypto.util';
-import { Error400, Error401, Error403, Error404 } from '../utils/error.utils';
+import { Error400, Error401, Error403 } from '../utils/error.utils';
 import { decryptAndVerifyJWT, signAndEncryptJWT } from '../utils/jwt.util';
 
 const _15MINS = '15m';
 const _1DAY = '1d';
+
+const createAccessToken = (payload: Record<string, unknown>) => {
+  return signAndEncryptJWT(payload, ACCESS_TOKEN_SECRET, ACCESS_TOKEN_ENCRYPT_SECRET, {
+    expiresIn: _15MINS,
+  });
+};
+
+const createRefreshToken = (payload: Record<string, unknown>, rememberMe?: boolean) => {
+  return signAndEncryptJWT(payload, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_ENCRYPT_SECRET, {
+    expiresIn: rememberMe ? _1DAY : '50y',
+  });
+};
 
 export type GenerateCSRFToken = RequestHandler<{}, Pick<SuccessfulResponse<string>, 'data'>>;
 
@@ -62,22 +74,39 @@ export const login: Login = async (req, res, next) => {
       userId: user.id,
     };
 
-    const accessToken = await signAndEncryptJWT(
-      jwtPayload,
-      ACCESS_TOKEN_SECRET,
-      ACCESS_TOKEN_ENCRYPT_SECRET,
-      { expiresIn: _15MINS }
-    );
-    const refreshToken = await signAndEncryptJWT(
-      jwtPayload,
-      REFRESH_TOKEN_SECRET,
-      REFRESH_TOKEN_ENCRYPT_SECRET,
-      { expiresIn: rememberMe ? _1DAY : '50y' }
-    );
+    const accessToken = await createAccessToken(jwtPayload);
 
-    await updateUser({ _id: user.id }, { refreshToken });
+    let refreshToken = user.refreshToken;
 
-    res.cookie(COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookieConfig);
+    // Create a new refresh token if there is no refresh token
+    if (!refreshToken) {
+      refreshToken = await createRefreshToken(jwtPayload, rememberMe);
+    } else {
+      // User has a refresh token
+      try {
+        // Try to verify the refresh token
+        await decryptAndVerifyJWT<JWTPayload>(
+          refreshToken,
+          REFRESH_TOKEN_ENCRYPT_SECRET,
+          REFRESH_TOKEN_SECRET
+        );
+      } catch (error) {
+        // Refresh token is expired, create a new one
+        if (error instanceof errors.JWTExpired) {
+          refreshToken = await createRefreshToken(jwtPayload, rememberMe);
+        } else {
+          // Other token errors
+          next(error);
+        }
+      }
+    }
+
+    // Update the refresh token
+    if (refreshToken !== user.refreshToken) {
+      await updateUser({ _id: user.id }, { refreshToken });
+      res.cookie(COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookieConfig);
+    }
+
     return res.json({
       data: {
         accessToken,
@@ -213,12 +242,6 @@ export const refreshAccessToken: RefreshAccessToken = async (req, res, next) => 
       throw new Error403();
     }
 
-    // Check the existence of the user
-    const user = await getUser({ refreshToken });
-    if (!user) {
-      throw new Error404('User not found');
-    }
-
     let payload: JWTPayload;
     try {
       // Verify the refresh token
@@ -240,12 +263,7 @@ export const refreshAccessToken: RefreshAccessToken = async (req, res, next) => 
     const newPayload: JWTPayload = {
       userId: payload!.userId,
     };
-    const accessToken = await signAndEncryptJWT(
-      newPayload,
-      ACCESS_TOKEN_ENCRYPT_SECRET,
-      ACCESS_TOKEN_SECRET,
-      { expiresIn: _15MINS }
-    );
+    const accessToken = await createAccessToken(newPayload);
 
     return res.json({
       data: {

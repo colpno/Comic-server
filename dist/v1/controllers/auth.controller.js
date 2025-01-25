@@ -20,6 +20,16 @@ const error_utils_1 = require("../utils/error.utils");
 const jwt_util_1 = require("../utils/jwt.util");
 const _15MINS = '15m';
 const _1DAY = '1d';
+const createAccessToken = (payload) => {
+    return (0, jwt_util_1.signAndEncryptJWT)(payload, common_conf_1.ACCESS_TOKEN_SECRET, common_conf_1.ACCESS_TOKEN_ENCRYPT_SECRET, {
+        expiresIn: _15MINS,
+    });
+};
+const createRefreshToken = (payload, rememberMe) => {
+    return (0, jwt_util_1.signAndEncryptJWT)(payload, common_conf_1.REFRESH_TOKEN_SECRET, common_conf_1.REFRESH_TOKEN_ENCRYPT_SECRET, {
+        expiresIn: rememberMe ? _1DAY : '50y',
+    });
+};
 const generateCSRFToken = (req, res, next) => {
     try {
         return res.json({ data: req.csrfToken() });
@@ -46,10 +56,34 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         const jwtPayload = {
             userId: user.id,
         };
-        const accessToken = yield (0, jwt_util_1.signAndEncryptJWT)(jwtPayload, common_conf_1.ACCESS_TOKEN_SECRET, common_conf_1.ACCESS_TOKEN_ENCRYPT_SECRET, { expiresIn: _15MINS });
-        const refreshToken = yield (0, jwt_util_1.signAndEncryptJWT)(jwtPayload, common_conf_1.REFRESH_TOKEN_SECRET, common_conf_1.REFRESH_TOKEN_ENCRYPT_SECRET, { expiresIn: rememberMe ? _1DAY : '50y' });
-        yield (0, user_service_1.updateUser)({ _id: user.id }, { refreshToken });
-        res.cookie(common_conf_1.COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookie_conf_1.cookieConfig);
+        const accessToken = yield createAccessToken(jwtPayload);
+        let refreshToken = user.refreshToken;
+        // Create a new refresh token if there is no refresh token
+        if (!refreshToken) {
+            refreshToken = yield createRefreshToken(jwtPayload, rememberMe);
+        }
+        else {
+            // User has a refresh token
+            try {
+                // Try to verify the refresh token
+                yield (0, jwt_util_1.decryptAndVerifyJWT)(refreshToken, common_conf_1.REFRESH_TOKEN_ENCRYPT_SECRET, common_conf_1.REFRESH_TOKEN_SECRET);
+            }
+            catch (error) {
+                // Refresh token is expired, create a new one
+                if (error instanceof jose_1.errors.JWTExpired) {
+                    refreshToken = yield createRefreshToken(jwtPayload, rememberMe);
+                }
+                else {
+                    // Other token errors
+                    next(error);
+                }
+            }
+        }
+        // Update the refresh token
+        if (refreshToken !== user.refreshToken) {
+            yield (0, user_service_1.updateUser)({ _id: user.id }, { refreshToken });
+            res.cookie(common_conf_1.COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookie_conf_1.cookieConfig);
+        }
         return res.json({
             data: {
                 accessToken,
@@ -158,11 +192,6 @@ const refreshAccessToken = (req, res, next) => __awaiter(void 0, void 0, void 0,
         if (!refreshToken) {
             throw new error_utils_1.Error403();
         }
-        // Check the existence of the user
-        const user = yield (0, user_service_1.getUser)({ refreshToken });
-        if (!user) {
-            throw new error_utils_1.Error404('User not found');
-        }
         let payload;
         try {
             // Verify the refresh token
@@ -181,7 +210,7 @@ const refreshAccessToken = (req, res, next) => __awaiter(void 0, void 0, void 0,
         const newPayload = {
             userId: payload.userId,
         };
-        const accessToken = yield (0, jwt_util_1.signAndEncryptJWT)(newPayload, common_conf_1.ACCESS_TOKEN_ENCRYPT_SECRET, common_conf_1.ACCESS_TOKEN_SECRET, { expiresIn: _15MINS });
+        const accessToken = yield createAccessToken(newPayload);
         return res.json({
             data: {
                 accessToken: accessToken,
