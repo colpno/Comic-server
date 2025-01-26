@@ -36,7 +36,6 @@ const register = (req, res, next) => {
 exports.register = register;
 const resetPassword = (req, res, next) => {
     const scheme = joi_conf_1.Joi.object({
-        email: joi_conf_1.Joi.string().email().required(),
         password: joi_conf_1.Joi.string().min(12).required(),
         passwordVerification: joi_conf_1.Joi.string().valid(joi_conf_1.Joi.ref('password')).required(),
     });

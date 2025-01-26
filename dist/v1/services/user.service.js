@@ -11,13 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateUser = exports.createUser = exports.getUser = void 0;
 const models_1 = require("../models");
-const converter_util_1 = require("../utils/converter.util");
-const filterToObjectId = (filter) => {
-    if (filter.id)
-        filter.id = (0, converter_util_1.toObjectId)(`${filter.id}`);
-};
 const getUser = (filter) => __awaiter(void 0, void 0, void 0, function* () {
-    filterToObjectId(filter);
     const user = yield models_1.UserModel.findOne(filter);
     return user;
 });
@@ -28,7 +22,6 @@ const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.createUser = createUser;
 const updateUser = (filter, update) => __awaiter(void 0, void 0, void 0, function* () {
-    filterToObjectId(filter);
     const user = yield models_1.UserModel.findOneAndUpdate(filter, update, { new: true });
     return user;
 });

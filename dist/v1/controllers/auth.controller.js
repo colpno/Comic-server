@@ -15,6 +15,7 @@ const httpCode_constant_1 = require("../../constants/httpCode.constant");
 const common_conf_1 = require("../configs/common.conf");
 const cookie_conf_1 = require("../configs/cookie.conf");
 const user_service_1 = require("../services/user.service");
+const converter_util_1 = require("../utils/converter.util");
 const crypto_util_1 = require("../utils/crypto.util");
 const error_utils_1 = require("../utils/error.utils");
 const jwt_util_1 = require("../utils/jwt.util");
@@ -144,8 +145,9 @@ exports.register = register;
 const resetPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password, passwordVerification } = req.body;
+        const { userId } = req.user;
         // Check the existence of the user
-        const existingUser = yield (0, user_service_1.getUser)({ email });
+        const existingUser = yield (0, user_service_1.getUser)(email ? { email } : { _id: (0, converter_util_1.toObjectId)(userId) });
         if (!existingUser) {
             throw new error_utils_1.Error400('No user that has the email');
         }
@@ -163,7 +165,7 @@ const resetPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, func
                 salt,
             },
         };
-        const result = yield (0, user_service_1.updateUser)({ email }, neededUpdate);
+        const result = yield (0, user_service_1.updateUser)({ _id: (0, converter_util_1.toObjectId)(userId) }, neededUpdate);
         // No user is updated
         if (!result) {
             throw new error_utils_1.Error400('Failed to update the password');
