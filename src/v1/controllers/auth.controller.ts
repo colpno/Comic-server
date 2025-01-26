@@ -104,8 +104,8 @@ export const login: Login = async (req, res, next) => {
     // Update the refresh token
     if (refreshToken !== user.refreshToken) {
       await updateUser({ _id: user.id }, { refreshToken });
-      res.cookie(COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookieConfig);
     }
+    res.cookie(COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookieConfig);
 
     return res.json({
       data: {
@@ -118,28 +118,18 @@ export const login: Login = async (req, res, next) => {
 };
 
 export const logout: RequestHandler = async (req, res, next) => {
+  const refreshToken = req.cookies?.[COOKIE_NAME_REFRESH_TOKEN];
+
   const clearCookies = () => {
     res.clearCookie(COOKIE_NAME_REFRESH_TOKEN, clearCookieConfig);
   };
 
   try {
     // Check the existence of the refresh token
-    const refreshToken = req.cookies?.[COOKIE_NAME_REFRESH_TOKEN];
     if (!refreshToken) {
       return res.sendStatus(HTTP_204_NO_CONTENT);
     }
 
-    // Get user
-    const userWithRefreshToken = await getUser({ refreshToken });
-
-    // No user with the refresh token
-    if (!userWithRefreshToken) {
-      clearCookies();
-      return res.sendStatus(HTTP_204_NO_CONTENT);
-    }
-
-    // Remove refresh token
-    await updateUser({ _id: userWithRefreshToken.id }, { $unset: { refreshToken: 1 } });
     clearCookies();
 
     return res.sendStatus(HTTP_204_NO_CONTENT);

@@ -82,8 +82,8 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         // Update the refresh token
         if (refreshToken !== user.refreshToken) {
             yield (0, user_service_1.updateUser)({ _id: user.id }, { refreshToken });
-            res.cookie(common_conf_1.COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookie_conf_1.cookieConfig);
         }
+        res.cookie(common_conf_1.COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookie_conf_1.cookieConfig);
         return res.json({
             data: {
                 accessToken,
@@ -97,24 +97,15 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
 exports.login = login;
 const logout = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
+    const refreshToken = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a[common_conf_1.COOKIE_NAME_REFRESH_TOKEN];
     const clearCookies = () => {
         res.clearCookie(common_conf_1.COOKIE_NAME_REFRESH_TOKEN, cookie_conf_1.clearCookieConfig);
     };
     try {
         // Check the existence of the refresh token
-        const refreshToken = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a[common_conf_1.COOKIE_NAME_REFRESH_TOKEN];
         if (!refreshToken) {
             return res.sendStatus(httpCode_constant_1.HTTP_204_NO_CONTENT);
         }
-        // Get user
-        const userWithRefreshToken = yield (0, user_service_1.getUser)({ refreshToken });
-        // No user with the refresh token
-        if (!userWithRefreshToken) {
-            clearCookies();
-            return res.sendStatus(httpCode_constant_1.HTTP_204_NO_CONTENT);
-        }
-        // Remove refresh token
-        yield (0, user_service_1.updateUser)({ _id: userWithRefreshToken.id }, { $unset: { refreshToken: 1 } });
         clearCookies();
         return res.sendStatus(httpCode_constant_1.HTTP_204_NO_CONTENT);
     }
