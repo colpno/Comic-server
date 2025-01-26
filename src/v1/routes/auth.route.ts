@@ -19,6 +19,7 @@ router.put(
   authValidator.resetPassword,
   authController.resetPassword
 );
+router.put('/password/forgot', authValidator.resetPassword, authController.resetPassword);
 
 const authRouter = router;
 export default authRouter;
