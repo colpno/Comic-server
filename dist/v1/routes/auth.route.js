@@ -11,7 +11,6 @@ router.get('/refresh-token', middlewares_1.isAuthenticated, controllers_1.authCo
 router.post('/login', validations_1.authValidator.login, controllers_1.authController.login);
 router.post('/register', validations_1.authValidator.register, controllers_1.authController.register);
 router.put('/password/reset', middlewares_1.isAuthenticated, validations_1.authValidator.resetPassword, controllers_1.authController.resetPassword);
-router.put('/password/forgot', validations_1.authValidator.resetPassword, controllers_1.authController.resetPassword);
 const authRouter = router;
 exports.default = authRouter;
 //# sourceMappingURL=auth.route.js.map
