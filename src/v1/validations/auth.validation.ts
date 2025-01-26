@@ -52,7 +52,6 @@ type ResetPasswordSchema = Record<keyof Parameters<ResetPassword>['0']['body'], 
 
 export const resetPassword: RequestHandler = (req, res, next) => {
   const scheme = Joi.object<ResetPasswordSchema>({
-    email: Joi.string().email().required(),
     password: Joi.string().min(12).required(),
     passwordVerification: Joi.string().valid(Joi.ref('password')).required(),
   });
