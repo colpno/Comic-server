@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.arrayMinLength = exports.validateGetRequest = exports.embedSchema = exports.clientProvidedMongoOperatorsSchema = exports.logicalOperatorsSchema = exports.normalOperatorsSchema = exports.processValidationError = void 0;
+exports.validateGetRequest = exports.embedSchema = exports.clientProvidedMongoOperatorsSchema = exports.logicalOperatorsSchema = exports.normalOperatorsSchema = exports.processValidationError = void 0;
 const httpCode_constant_1 = require("../../constants/httpCode.constant");
 const joi_conf_1 = require("../configs/joi.conf");
 /*
@@ -60,11 +60,4 @@ exports.validateGetRequest = {
     _select: joi_conf_1.Joi.string(),
     _embed: joi_conf_1.Joi.alternatives().try(joi_conf_1.Joi.string(), exports.embedSchema, joi_conf_1.Joi.array().items(exports.embedSchema)),
 };
-/*
-=====================================================
-                  Mongoose Schema
-=====================================================
-*/
-const arrayMinLength = (limit) => (value) => value.length >= limit;
-exports.arrayMinLength = arrayMinLength;
 //# sourceMappingURL=validation.util.js.map
