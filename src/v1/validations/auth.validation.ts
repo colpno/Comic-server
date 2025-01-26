@@ -11,7 +11,7 @@ type LoginSchema = Record<keyof Parameters<Login>['0']['body'], Schema>;
 export const login: RequestHandler = (req, res, next) => {
   const scheme = Joi.object<LoginSchema>({
     email: Joi.string().email().required(),
-    password: Joi.string().min(16).required(),
+    password: Joi.string().min(12).required(),
     rememberMe: Joi.boolean().optional(),
   });
 
@@ -32,7 +32,7 @@ type RegisterSchema = Record<keyof Parameters<Register>['0']['body'], Schema>;
 export const register: RequestHandler = (req, res, next) => {
   const scheme = Joi.object<RegisterSchema>({
     email: Joi.string().email().required(),
-    password: Joi.string().min(16).required(),
+    password: Joi.string().min(12).required(),
     passwordVerification: Joi.string().valid(Joi.ref('password')).required(),
   });
 
@@ -53,7 +53,7 @@ type ResetPasswordSchema = Record<keyof Parameters<ResetPassword>['0']['body'], 
 export const resetPassword: RequestHandler = (req, res, next) => {
   const scheme = Joi.object<ResetPasswordSchema>({
     email: Joi.string().email().required(),
-    password: Joi.string().min(16).required(),
+    password: Joi.string().min(12).required(),
     passwordVerification: Joi.string().valid(Joi.ref('password')).required(),
   });
 
