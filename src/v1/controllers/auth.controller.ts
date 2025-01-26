@@ -14,6 +14,7 @@ import { createUser, getUser, updateUser } from '../services/user.service';
 import { SuccessfulResponse } from '../types/api.type';
 import { JWTPayload } from '../types/common.type';
 import { User } from '../types/user.type';
+import { toObjectId } from '../utils/converter.util';
 import { generateSalt, hashString } from '../utils/crypto.util';
 import { Error400, Error401, Error403 } from '../utils/error.utils';
 import { decryptAndVerifyJWT, signAndEncryptJWT } from '../utils/jwt.util';
@@ -176,18 +177,19 @@ export const register: Register = async (req, res, next) => {
 };
 
 interface ResetPasswordBody {
-  email: string;
   password: string;
   passwordVerification: string;
+  email?: string;
 }
 export type ResetPassword = RequestHandler<{}, unknown, ResetPasswordBody>;
 
 export const resetPassword: ResetPassword = async (req, res, next) => {
   try {
     const { email, password, passwordVerification } = req.body;
+    const { userId } = req.user;
 
     // Check the existence of the user
-    const existingUser = await getUser({ email });
+    const existingUser = await getUser(email ? { email } : { _id: toObjectId(userId) });
     if (!existingUser) {
       throw new Error400('No user that has the email');
     }
@@ -208,7 +210,7 @@ export const resetPassword: ResetPassword = async (req, res, next) => {
         salt,
       },
     };
-    const result = await updateUser({ email }, neededUpdate);
+    const result = await updateUser({ _id: toObjectId(userId) }, neededUpdate);
 
     // No user is updated
     if (!result) {
