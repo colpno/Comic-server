@@ -9,7 +9,7 @@ export const getUser = async (filter: FilterQuery<User>) => {
   return user as unknown as User;
 };
 
-export const createUser = async (data: Pick<User, 'email' | 'password'>) => {
+export const createUser = async (data: Pick<User, 'username' | 'email' | 'password'>) => {
   const user = await UserModel.create({
     ...data,
     uuid: crypto.randomUUID(),

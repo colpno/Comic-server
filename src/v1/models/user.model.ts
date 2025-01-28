@@ -6,7 +6,8 @@ import { User as OriUser } from '../types/user.type';
 type User = Omit<OriUser, 'id'>;
 
 const schema = new mongoose.Schema<User>({
-  email: { type: String, required: true, unique: true },
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
   password: {
     hashed: { type: String, required: true },
     salt: { type: String, required: true },

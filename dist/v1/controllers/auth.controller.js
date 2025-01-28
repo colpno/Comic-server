@@ -42,11 +42,11 @@ const generateCSRFToken = (req, res, next) => {
 exports.generateCSRFToken = generateCSRFToken;
 const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, password, rememberMe } = req.body;
+        const { username, password, rememberMe } = req.body;
         // Check if the user is already registered
-        const user = yield (0, user_service_1.getUser)({ email });
+        const user = yield (0, user_service_1.getUser)({ username });
         if (!user) {
-            throw new error_utils_1.Error400(`${email} is not registered`);
+            throw new error_utils_1.Error400(`${username} is not registered`);
         }
         // Compare passwords
         const hashedPassword = (0, crypto_util_1.hashString)(password, user.password.salt).hashedValue;
@@ -117,9 +117,9 @@ const logout = (req, res, next) => __awaiter(void 0, void 0, void 0, function* (
 exports.logout = logout;
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, password } = req.body;
+        const { username, email, password } = req.body;
         // Check if the user already exists
-        const existingUser = yield (0, user_service_1.getUser)({ email });
+        const existingUser = yield (0, user_service_1.getUser)({ username });
         if (existingUser) {
             throw new error_utils_1.Error400('Email already exists');
         }
@@ -128,6 +128,7 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         const hashedPassword = (0, crypto_util_1.hashString)(password, salt).hashedValue;
         // Create the new user
         const newUser = {
+            username,
             email,
             password: {
                 hashed: hashedPassword,

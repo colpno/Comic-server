@@ -45,7 +45,7 @@ export const generateCSRFToken: GenerateCSRFToken = (req, res, next) => {
 };
 
 interface LoginBody {
-  email: string;
+  username: string;
   password: string;
   rememberMe?: boolean;
 }
@@ -56,12 +56,12 @@ export type Login = RequestHandler<{}, LoginReturnType, LoginBody>;
 
 export const login: Login = async (req, res, next) => {
   try {
-    const { email, password, rememberMe } = req.body;
+    const { username, password, rememberMe } = req.body;
 
     // Check if the user is already registered
-    const user = await getUser({ email });
+    const user = await getUser({ username });
     if (!user) {
-      throw new Error400(`${email} is not registered`);
+      throw new Error400(`${username} is not registered`);
     }
 
     // Compare passwords
@@ -140,6 +140,7 @@ export const logout: RequestHandler = async (req, res, next) => {
 };
 
 interface RegisterBody {
+  username: string;
   email: string;
   password: string;
   passwordVerification: string;
@@ -148,10 +149,10 @@ export type Register = RequestHandler<{}, unknown, RegisterBody>;
 
 export const register: Register = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
 
     // Check if the user already exists
-    const existingUser = await getUser({ email });
+    const existingUser = await getUser({ username });
     if (existingUser) {
       throw new Error400('Email already exists');
     }
@@ -162,6 +163,7 @@ export const register: Register = async (req, res, next) => {
 
     // Create the new user
     const newUser: Parameters<typeof createUser>[0] = {
+      username,
       email,
       password: {
         hashed: hashedPassword,

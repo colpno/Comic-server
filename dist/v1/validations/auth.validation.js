@@ -6,7 +6,7 @@ const validation_util_1 = require("../utils/validation.util");
 const _1 = require("./");
 const login = (req, res, next) => {
     const scheme = joi_conf_1.Joi.object({
-        email: joi_conf_1.Joi.string().email().required(),
+        username: joi_conf_1.Joi.string().required(),
         password: joi_conf_1.Joi.string().min(12).required(),
         rememberMe: joi_conf_1.Joi.boolean().optional(),
     });
@@ -21,6 +21,7 @@ const login = (req, res, next) => {
 exports.login = login;
 const register = (req, res, next) => {
     const scheme = joi_conf_1.Joi.object({
+        username: joi_conf_1.Joi.string().required(),
         email: joi_conf_1.Joi.string().email().required(),
         password: joi_conf_1.Joi.string().min(12).required(),
         passwordVerification: joi_conf_1.Joi.string().valid(joi_conf_1.Joi.ref('password')).required(),
