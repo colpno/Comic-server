@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.nonResourcesController = exports.mangadexController = exports.genreController = exports.followController = exports.comicController = exports.chapterController = exports.authController = void 0;
+exports.userController = exports.nonResourcesController = exports.mangadexController = exports.genreController = exports.followController = exports.comicController = exports.chapterController = exports.authController = void 0;
 exports.authController = __importStar(require("./auth.controller"));
 exports.chapterController = __importStar(require("./chapter.controller"));
 exports.comicController = __importStar(require("./comic.controller"));
@@ -31,4 +31,5 @@ exports.followController = __importStar(require("./follow.controller"));
 exports.genreController = __importStar(require("./genre.controller"));
 exports.mangadexController = __importStar(require("./mangadex.controller"));
 exports.nonResourcesController = __importStar(require("./nonResources.controller"));
+exports.userController = __importStar(require("./user.controller"));
 //# sourceMappingURL=index.js.map

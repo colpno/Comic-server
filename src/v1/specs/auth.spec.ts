@@ -1,6 +1,7 @@
 import { Tspec } from 'tspec';
 
 import { BASE_ENDPOINT } from '../constants/common.constant';
+import { userController } from '../controllers';
 import * as authController from '../controllers/auth.controller';
 
 export type AuthApiSpec = Tspec.DefineApiSpec<{
@@ -42,10 +43,22 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
     };
 
     // PUT
-    '/reset-password': {
+    '/password/reset': {
       put: {
-        summary: 'Reset password';
+        summary: 'Reset password for logged in user';
         handler: typeof authController.resetPassword;
+      };
+    };
+    '/password/forgot': {
+      put: {
+        summary: 'Reset password for users who forgot their password';
+        handler: typeof authController.resetPassword;
+      };
+    };
+    '/user': {
+      put: {
+        summary: 'Update user profile';
+        handler: typeof userController.updateUser;
       };
     };
   };
