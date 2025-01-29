@@ -19,18 +19,22 @@ const converter_util_1 = require("../utils/converter.util");
 const crypto_util_1 = require("../utils/crypto.util");
 const error_utils_1 = require("../utils/error.utils");
 const jwt_util_1 = require("../utils/jwt.util");
-const _15MINS = '15m';
-const _1DAY = '1d';
-const createAccessToken = (payload) => {
-    return (0, jwt_util_1.signAndEncryptJWT)(payload, common_conf_1.ACCESS_TOKEN_SECRET, common_conf_1.ACCESS_TOKEN_ENCRYPT_SECRET, {
-        expiresIn: _15MINS,
+const createAccessToken = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = yield (0, jwt_util_1.signAndEncryptJWT)(payload, common_conf_1.ACCESS_TOKEN_SECRET, common_conf_1.ACCESS_TOKEN_ENCRYPT_SECRET, {
+        expiresIn: '15 minutes',
     });
-};
-const createRefreshToken = (payload, rememberMe) => {
-    return (0, jwt_util_1.signAndEncryptJWT)(payload, common_conf_1.REFRESH_TOKEN_SECRET, common_conf_1.REFRESH_TOKEN_ENCRYPT_SECRET, {
-        expiresIn: rememberMe ? _1DAY : '50y',
+    const expiredTimeInMS = (0, converter_util_1.toMS)(15, 'minutes');
+    const expiredTime = new Date(Date.now() + expiredTimeInMS).toTimeString();
+    return {
+        accessToken: token,
+        tokenExpiredTime: expiredTime,
+    };
+});
+const createRefreshToken = (payload, rememberMe) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield (0, jwt_util_1.signAndEncryptJWT)(payload, common_conf_1.REFRESH_TOKEN_SECRET, common_conf_1.REFRESH_TOKEN_ENCRYPT_SECRET, {
+        expiresIn: rememberMe ? '1 week' : '2 hours',
     });
-};
+});
 const generateCSRFToken = (req, res, next) => {
     try {
         return res.json({ data: req.csrfToken() });
@@ -60,7 +64,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         const accessToken = yield createAccessToken(jwtPayload);
         let refreshToken = user.refreshToken;
         // Create a new refresh token if there is no refresh token
-        if (!refreshToken) {
+        if (refreshToken !== undefined) {
             refreshToken = yield createRefreshToken(jwtPayload, rememberMe);
         }
         else {
@@ -86,9 +90,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         }
         res.cookie(common_conf_1.COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookie_conf_1.cookieConfig);
         return res.json({
-            data: {
-                accessToken,
-            },
+            data: accessToken,
         });
     }
     catch (error) {
@@ -206,9 +208,7 @@ const refreshAccessToken = (req, res, next) => __awaiter(void 0, void 0, void 0,
         };
         const accessToken = yield createAccessToken(newPayload);
         return res.json({
-            data: {
-                accessToken: accessToken,
-            },
+            data: accessToken,
         });
     }
     catch (error) {

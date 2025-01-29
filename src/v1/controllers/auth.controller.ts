@@ -14,23 +14,26 @@ import { createUser, getUser, updateUser } from '../services/user.service';
 import { SuccessfulResponse } from '../types/api.type';
 import { JWTPayload } from '../types/common.type';
 import { User } from '../types/user.type';
-import { toObjectId } from '../utils/converter.util';
+import { toMS, toObjectId } from '../utils/converter.util';
 import { generateSalt, hashString } from '../utils/crypto.util';
 import { Error400, Error401, Error403 } from '../utils/error.utils';
 import { decryptAndVerifyJWT, signAndEncryptJWT } from '../utils/jwt.util';
 
-const _15MINS = '15m';
-const _1DAY = '1d';
-
-const createAccessToken = (payload: Record<string, unknown>) => {
-  return signAndEncryptJWT(payload, ACCESS_TOKEN_SECRET, ACCESS_TOKEN_ENCRYPT_SECRET, {
-    expiresIn: _15MINS,
+const createAccessToken = async (payload: Record<string, unknown>) => {
+  const token = await signAndEncryptJWT(payload, ACCESS_TOKEN_SECRET, ACCESS_TOKEN_ENCRYPT_SECRET, {
+    expiresIn: '15 minutes',
   });
+  const expiredTimeInMS = toMS(15, 'minutes');
+  const expiredTime = new Date(Date.now() + expiredTimeInMS).toTimeString();
+  return {
+    accessToken: token,
+    tokenExpiredTime: expiredTime,
+  };
 };
 
-const createRefreshToken = (payload: Record<string, unknown>, rememberMe?: boolean) => {
-  return signAndEncryptJWT(payload, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_ENCRYPT_SECRET, {
-    expiresIn: rememberMe ? _1DAY : '50y',
+const createRefreshToken = async (payload: Record<string, unknown>, rememberMe?: boolean) => {
+  return await signAndEncryptJWT(payload, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_ENCRYPT_SECRET, {
+    expiresIn: rememberMe ? '1 week' : '2 hours',
   });
 };
 
@@ -49,9 +52,7 @@ interface LoginBody {
   password: string;
   rememberMe?: boolean;
 }
-type LoginReturnType = SuccessfulResponse<{
-  accessToken: string;
-}>;
+type LoginReturnType = SuccessfulResponse<Awaited<ReturnType<typeof createAccessToken>>>;
 export type Login = RequestHandler<{}, LoginReturnType, LoginBody>;
 
 export const login: Login = async (req, res, next) => {
@@ -80,7 +81,7 @@ export const login: Login = async (req, res, next) => {
     let refreshToken = user.refreshToken;
 
     // Create a new refresh token if there is no refresh token
-    if (!refreshToken) {
+    if (refreshToken !== undefined) {
       refreshToken = await createRefreshToken(jwtPayload, rememberMe);
     } else {
       // User has a refresh token
@@ -109,9 +110,7 @@ export const login: Login = async (req, res, next) => {
     res.cookie(COOKIE_NAME_REFRESH_TOKEN, refreshToken, cookieConfig);
 
     return res.json({
-      data: {
-        accessToken,
-      },
+      data: accessToken,
     });
   } catch (error) {
     next(error);
@@ -225,7 +224,10 @@ export const resetPassword: ResetPassword = async (req, res, next) => {
   }
 };
 
-type RefreshAccessToken = RequestHandler<{}, SuccessfulResponse<{ accessToken: string }>>;
+type RefreshAccessTokenReturnType = SuccessfulResponse<
+  Awaited<ReturnType<typeof createAccessToken>>
+>;
+type RefreshAccessToken = RequestHandler<{}, RefreshAccessTokenReturnType>;
 
 export const refreshAccessToken: RefreshAccessToken = async (req, res, next) => {
   try {
@@ -260,9 +262,7 @@ export const refreshAccessToken: RefreshAccessToken = async (req, res, next) => 
     const accessToken = await createAccessToken(newPayload);
 
     return res.json({
-      data: {
-        accessToken: accessToken,
-      },
+      data: accessToken,
     });
   } catch (error) {
     next(error);
