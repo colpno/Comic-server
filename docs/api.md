@@ -64,7 +64,7 @@ Prefix API endpoints with `/api` to separate them from other URLs like static fi
 
 Versioning your API allows you to make non-backwards compatible changes to your API for newer clients by introducing new versions of endpoints while not breaking existing clients.
 
-Include `/v1` in the URL after the [api](#prefix-api-endpoints) path.
+Include `/v1` in the URL after the [/api](#prefix-api-endpoints) path.
 
 <details>
 	<summary>Click to see example</summary>
@@ -94,13 +94,13 @@ A resource can also be nested, usually if there some sort of parent/child relati
 ##### Use an identifier following a noun to refer to a single entity:
 
 ```js
-/api/v1/comics/42
+/api/v1/comics/{title}
 ```
 
 ##### Refer to a nested resource like so:
 
 ```js
-/api/v1/comics/1/comments
+/api/v1/comics/{title}?_embed=cover_art
 ```
 
 </details>
@@ -137,16 +137,10 @@ Instead of searching for a specific value, this advanced technique allows you to
 ##### Example
 
 ```js
-// ✅ Correct
 const query = {
   title: {
     eq: 'Hello',
   },
-};
-
-// ❌ Wrong - This is for basic filter
-const query = {
-  title: 'Hello',
 };
 ```
 
@@ -393,42 +387,6 @@ const query = {
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-#### or
-
-> | Key  |    Data type     | Required? | Description                                      |
-> | ---- | :--------------: | :-------: | ------------------------------------------------ |
-> | `or` | array of objects |    no     | This filters or that filters, can't use or, and. |
-
-##### Examples
-
-```js
-const query = {
-  title: {
-    or: [{ title: 'Hello' }, { title: 'World' }],
-  },
-};
-```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### and
-
-> | Key   |    Data type     | Required? | Description                                       |
-> | ----- | :--------------: | :-------: | ------------------------------------------------- |
-> | `and` | array of objects |    no     | This filters and that filters, can't use or, and. |
-
-##### Examples
-
-```js
-const query = {
-  title: {
-    and: [{ title: 'Hello' }, { title: 'World' }],
-  },
-};
-```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 #### Pagination
 
 > | Key      | Data type | Required? | Description                   |
@@ -590,9 +548,8 @@ Authorization payload should contain following data:
 
 ```json
 {
-  "accessToken": "<access-token>",
-  "refreshToken": "<refresh-token>",
-  "expiresIn": "<seconds>"
+  "accessToken": "token",
+  "tokenExpiredTime": "ISO string"
 }
 ```
 
@@ -606,15 +563,9 @@ User role packed in `accessToken` is used for authorizing and allowing which act
 
 ### CSRF token
 
-In order to be able to successfully request to POST routes, you need a [X-CSRF-TOKEN](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html) HTTP header to prove the user is trustworthy.
+In order to be able to successfully request to POST/PUT/PATCH/DELETE routes, you need a [csrf](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html) in cookie to bypass protection.
 
-To implement CSRF protection. Request to [CSRF route](#csrf), and attach the token returned by the route into the header.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### 3rd party authentication and SSO
-
-For implementing authentication with 3rd party services (e.g. Facebook, Google, etc.) or SSO we recommend to use OAuth2.0 or/and OIDC.
+To add CSRF protection. Request to `/auth/csrf-token`, the cookie will be added automatically.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -627,7 +578,6 @@ A few rules the response has to follow:
 - When the result is empty, the response needs to return in the following way:
   - Collection: Return empty array.
   - Empty key: Unset the key.
-- Consistency of key types. e.g. always return id as a string in all endpoints.
 - Date/timestamps should always be returned in ISO format.
 - Content (being a single object or a collection) should be returned in a key (e.g. data).
 - Pagination data should be returned in a meta key.
@@ -908,12 +858,10 @@ A few rules the response has to follow:
 > | `403` | `Forbidden`             | When an authenticated user is trying to perform an action, which he/she does not have permission to. |
 > | `404` | `Not found`             | When URL or entity is not found.                                                                     |
 > | `500` | `Internal server error` | When an internal error has happened (e.g. when trying to add/update records in the database fails).  |
-> | `502` | `Bad Gateway`           | When a necessary third party service is down.                                                        |
+> | `503` | `Server unavailable`    | When the server is not able to serve                                                                 |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Routes
-
-### V1
 
 Visit [http://localhost:3000/api/v1/docs](http://localhost:3000/api/v1/docs).
