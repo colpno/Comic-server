@@ -17,7 +17,7 @@ const router = Router();
 router.get('/health', nonResourcesController.healthCheck);
 router.get(
   '/proxy/:proxyUrl',
-  rateLimiter({ limit: 200, windowMs: toMS(30, 'seconds') }),
+  rateLimiter({ limit: 100, windowMs: toMS(10, 'seconds') }),
   nonResourcesValidator.proxy,
   nonResourcesController.proxy
 );
