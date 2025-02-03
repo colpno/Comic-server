@@ -24,5 +24,7 @@ export type Proxy = RequestHandler<{ proxyUrl: string }, void, null>;
 
 export const proxy: Proxy = async (req, res) => {
   req.url = decodeURIComponent(req.url).replace('/proxy/', '/'); // Strip '/proxy' from the front of the URL, else the proxy won't work.
+  req.headers['referer'] = ''; // Set the referer header to empty value to bypass the Mangadex API's CORS.
+
   corsProxy.emit('request', req, res);
 };
