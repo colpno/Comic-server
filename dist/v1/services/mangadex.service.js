@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mangadexToChapter = exports.mangadexToComic = void 0;
+const app_conf_1 = require("../../configs/app.conf");
+const common_conf_1 = require("../configs/common.conf");
 const groupRelationships = (relationships) => {
     const grouped = [...relationships].reduce((acc, relationship) => {
         const { type, attributes, id } = relationship;
@@ -22,6 +24,7 @@ const groupRelationships = (relationships) => {
 const mangadexToComic = (manga) => {
     let cover = '';
     let relationships;
+    const proxyUrl = `${app_conf_1.HOST_URL}/proxy`;
     if ('relationships' in manga) {
         const coverArt = manga.relationships.find((relationship) => relationship.type === 'cover_art');
         const coverFilename = (coverArt === null || coverArt === void 0 ? void 0 : coverArt.attributes) && 'fileName' in coverArt.attributes
@@ -32,6 +35,7 @@ const mangadexToComic = (manga) => {
     }
     const authors = (relationships === null || relationships === void 0 ? void 0 : relationships.author) || undefined;
     const artists = (relationships === null || relationships === void 0 ? void 0 : relationships.artist) || undefined;
+    const coverImageUrl = common_conf_1.APP_ENVIRONMENT === 'development' ? cover : `${proxyUrl}/${encodeURIComponent(cover)}`;
     return {
         id: manga.id,
         type: manga.type,
@@ -64,7 +68,7 @@ const mangadexToComic = (manga) => {
         updatedAt: manga.attributes.updatedAt,
         /** Chapter ID. */
         latestUploadedChapter: manga.attributes.latestUploadedChapter || undefined,
-        coverImageUrl: cover,
+        coverImageUrl,
         chapters: [],
         // /** Comic IDs. */
         related: relationships === null || relationships === void 0 ? void 0 : relationships.manga,

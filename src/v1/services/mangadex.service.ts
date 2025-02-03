@@ -1,3 +1,5 @@
+import { HOST_URL } from '../../configs/app.conf';
+import { APP_ENVIRONMENT } from '../configs/common.conf';
 import { Chapter } from '../types/chapter.type';
 import { Comic } from '../types/comic.type';
 import {
@@ -32,6 +34,7 @@ const groupRelationships = (relationships: ResponseManga['relationships']) => {
 export const mangadexToComic = (manga: ResponseManga): Comic => {
   let cover: string = '';
   let relationships: Record<RelationshipType, unknown[]> | undefined;
+  const proxyUrl = `${HOST_URL}/proxy`;
 
   if ('relationships' in manga) {
     const coverArt = manga.relationships.find((relationship) => relationship.type === 'cover_art');
@@ -47,6 +50,8 @@ export const mangadexToComic = (manga: ResponseManga): Comic => {
     (relationships?.author as (Required<Relationship<'author'>> | string)[]) || undefined;
   const artists =
     (relationships?.artist as (Required<Relationship<'artist'>> | string)[]) || undefined;
+  const coverImageUrl =
+    APP_ENVIRONMENT === 'development' ? cover : `${proxyUrl}/${encodeURIComponent(cover)}`;
 
   return {
     id: manga.id,
@@ -77,7 +82,7 @@ export const mangadexToComic = (manga: ResponseManga): Comic => {
     updatedAt: manga.attributes.updatedAt,
     /** Chapter ID. */
     latestUploadedChapter: manga.attributes.latestUploadedChapter || undefined,
-    coverImageUrl: cover,
+    coverImageUrl,
     chapters: [],
     // /** Comic IDs. */
     related: relationships?.manga as string[],
