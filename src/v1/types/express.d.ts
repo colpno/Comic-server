@@ -7,6 +7,7 @@ declare global {
       originalParams?: Record<string, unknown>;
       originalQuery?: Record<string, unknown>;
       originalBody?: Record<string, unknown>;
+      clientIP?: string;
     }
   }
 }

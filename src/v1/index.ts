@@ -3,7 +3,7 @@ import express from 'express';
 
 import { cookieConfig } from './configs/cookie.conf';
 import { BASE_ENDPOINT } from './constants/common.constant';
-import { cookieCORS, cookieParser, cors, errorHandler } from './middlewares';
+import { cookieCORS, cookieParser, cors, errorHandler, retrieveClientIP } from './middlewares';
 import rateLimiter from './middlewares/rateLimiter.middleware';
 import router from './routes';
 
@@ -13,6 +13,7 @@ v1App.use(cors);
 v1App.use(cookieCORS);
 v1App.use(cookieParser);
 v1App.use(csurf({ cookie: cookieConfig }));
+v1App.use(retrieveClientIP);
 
 v1App.use(BASE_ENDPOINT, router, rateLimiter());
 

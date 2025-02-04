@@ -8,6 +8,9 @@ const rateLimiter = (options?: Parameters<typeof rateLimit>[0]) =>
     ...options,
     windowMs: options?.windowMs ?? 1000, // 1 second
     limit: options?.limit ?? 4, // 4 requests per second
+    keyGenerator(req) {
+      return req.clientIP;
+    },
   });
 
 export default rateLimiter;
