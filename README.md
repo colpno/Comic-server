@@ -74,6 +74,5 @@ npm run dev
 Tạ Gia Vinh
 
 - <img src="https://img.shields.io/badge/Gmail-EA4335?style=for-the-badge&logo=gmail&logoColor=61DAFB" alt="Gmail" style="vertical-align: middle;"> : gvinhh@gmail.com
-- <img src="https://img.shields.io/badge/Zalo-0068FF?style=for-the-badge&logo=zalo&logoColor=61DAFB" alt="Zalo" style="vertical-align: middle;"> (Phone): 034-523-4854
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
