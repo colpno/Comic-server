@@ -25,8 +25,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChapterContent = exports.getChaptersByMangaId = exports.getMangaByTitle = exports.getMangaList = exports.getTagIdList = exports.getTagList = void 0;
 const axios_1 = __importDefault(require("axios"));
-const app_conf_1 = require("../../configs/app.conf");
 const mangadex_service_1 = require("../services/mangadex.service");
+const converter_util_1 = require("../utils/converter.util");
 const BASE_URL = 'https://api.mangadex.org';
 const MANGA_URL = `${BASE_URL}/manga`;
 const TAG_URL = `${MANGA_URL}/tag`;
@@ -82,12 +82,17 @@ const getMangaList = (query) => __awaiter(void 0, void 0, void 0, function* () {
 exports.getMangaList = getMangaList;
 const getMangaByTitle = (titleQuery, query) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const cleanTitle = (title) => title.toLowerCase().replace(/[^\w]+/g, '');
         const title = titleQuery.replace(/-/g, ' ');
         const response = yield axios_1.default.get(MANGA_URL, {
             params: Object.assign(Object.assign({ contentRating: ['safe', 'suggestive'], availableTranslatedLanguage: ['en'] }, query), { title }),
         });
         // Find the manga with the exact title
-        const manga = response.data.data.find((manga) => manga.attributes.title.en.toLowerCase() === title.toLowerCase());
+        const cleanedTitleQuery = cleanTitle(titleQuery);
+        const manga = response.data.data.find((manga) => {
+            return (manga.attributes.title &&
+                Object.values(manga.attributes.title).some((t) => cleanTitle(t) === cleanedTitleQuery));
+        });
         if (!manga)
             return null;
         const comic = (0, mangadex_service_1.mangadexToComic)(manga);
@@ -136,19 +141,17 @@ const getChaptersByMangaId = (mangaId, query) => __awaiter(void 0, void 0, void 
 exports.getChaptersByMangaId = getChaptersByMangaId;
 const getChapterContent = (chapterId) => __awaiter(void 0, void 0, void 0, function* () {
     const url = getChapterImagesUrl(chapterId);
-    const proxyUrl = `${app_conf_1.HOST_URL}/proxy`;
     const response = yield axios_1.default.get(url);
-    const { data } = response;
+    const imageLength = response.data.chapter.data.length;
+    const baseUrl = 'https://uploads.mangadex.org';
+    const { hash, data, dataSaver } = response.data.chapter;
     const result = [];
-    const imageLength = data.chapter.data.length;
     for (let i = 0; i < imageLength; i++) {
-        const imageFile = data.chapter.data[i];
-        const imageUrl = `${data.baseUrl}/data/${data.chapter.hash}/${imageFile}`;
-        const compressedFile = data.chapter.dataSaver[i];
-        const compressedUrl = `${data.baseUrl}/data-saver/${data.chapter.hash}/${compressedFile}`;
+        const imageUrl = `${baseUrl}/data/${hash}/${data[i]}`;
+        const compressedUrl = `${baseUrl}/data-saver/${hash}/${dataSaver[i]}`;
         result.push({
-            data: `${proxyUrl}/${encodeURIComponent(imageUrl)}`,
-            dataSaver: `${proxyUrl}/${encodeURIComponent(compressedUrl)}`,
+            data: (0, converter_util_1.toProxyUrl)(imageUrl),
+            dataSaver: (0, converter_util_1.toProxyUrl)(compressedUrl),
         });
     }
     return result;

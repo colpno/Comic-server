@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mangadexToChapter = exports.mangadexToComic = void 0;
-const app_conf_1 = require("../../configs/app.conf");
 const common_conf_1 = require("../configs/common.conf");
+const converter_util_1 = require("../utils/converter.util");
 const groupRelationships = (relationships) => {
     const grouped = [...relationships].reduce((acc, relationship) => {
         const { type, attributes, id } = relationship;
@@ -24,7 +24,6 @@ const groupRelationships = (relationships) => {
 const mangadexToComic = (manga) => {
     let cover = '';
     let relationships;
-    const proxyUrl = `${app_conf_1.HOST_URL}/proxy`;
     if ('relationships' in manga) {
         const coverArt = manga.relationships.find((relationship) => relationship.type === 'cover_art');
         const coverFilename = (coverArt === null || coverArt === void 0 ? void 0 : coverArt.attributes) && 'fileName' in coverArt.attributes
@@ -35,11 +34,13 @@ const mangadexToComic = (manga) => {
     }
     const authors = (relationships === null || relationships === void 0 ? void 0 : relationships.author) || undefined;
     const artists = (relationships === null || relationships === void 0 ? void 0 : relationships.artist) || undefined;
-    const coverImageUrl = common_conf_1.APP_ENVIRONMENT === 'development' ? cover : `${proxyUrl}/${encodeURIComponent(cover)}`;
+    const coverImageUrl = common_conf_1.APP_ENVIRONMENT === 'development' ? cover : (0, converter_util_1.toProxyUrl)(cover);
     return {
         id: manga.id,
         type: manga.type,
-        title: manga.attributes.title.en,
+        title: Object.keys(manga.attributes.title).length === 1
+            ? Object.values(manga.attributes.title)[0]
+            : undefined,
         altTitles: manga.attributes.altTitles.reduce((acc, title) => {
             title.en && acc.push(title.en);
             return acc;

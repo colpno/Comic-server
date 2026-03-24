@@ -1,4 +1,3 @@
-import { HOST_URL } from '../../configs/app.conf';
 import { APP_ENVIRONMENT } from '../configs/common.conf';
 import { Chapter } from '../types/chapter.type';
 import { Comic } from '../types/comic.type';
@@ -8,25 +7,29 @@ import {
   ResponseChapter,
   ResponseManga,
 } from '../types/mangadex.type';
+import { toProxyUrl } from '../utils/converter.util';
 
 const groupRelationships = (relationships: ResponseManga['relationships']) => {
-  const grouped = [...relationships].reduce((acc, relationship) => {
-    const { type, attributes, id } = relationship;
+  const grouped = [...relationships].reduce(
+    (acc, relationship) => {
+      const { type, attributes, id } = relationship;
 
-    // Initialize the array if it doesn't exist.
-    if (!acc[type]) {
-      acc[type] = [];
-    }
+      // Initialize the array if it doesn't exist.
+      if (!acc[type]) {
+        acc[type] = [];
+      }
 
-    // Push the relationship if embedded or ID to the array.
-    if (attributes) {
-      acc[type].push(relationship);
-    } else {
-      !acc[type].includes(id) && acc[type].push(id);
-    }
+      // Push the relationship if embedded or ID to the array.
+      if (attributes) {
+        acc[type].push(relationship);
+      } else {
+        !acc[type].includes(id) && acc[type].push(id);
+      }
 
-    return acc;
-  }, {} as Record<RelationshipType, unknown[]>);
+      return acc;
+    },
+    {} as Record<RelationshipType, unknown[]>,
+  );
 
   return grouped;
 };
@@ -34,7 +37,6 @@ const groupRelationships = (relationships: ResponseManga['relationships']) => {
 export const mangadexToComic = (manga: ResponseManga): Comic => {
   let cover: string = '';
   let relationships: Record<RelationshipType, unknown[]> | undefined;
-  const proxyUrl = `${HOST_URL}/proxy`;
 
   if ('relationships' in manga) {
     const coverArt = manga.relationships.find((relationship) => relationship.type === 'cover_art');
@@ -50,13 +52,15 @@ export const mangadexToComic = (manga: ResponseManga): Comic => {
     (relationships?.author as (Required<Relationship<'author'>> | string)[]) || undefined;
   const artists =
     (relationships?.artist as (Required<Relationship<'artist'>> | string)[]) || undefined;
-  const coverImageUrl =
-    APP_ENVIRONMENT === 'development' ? cover : `${proxyUrl}/${encodeURIComponent(cover)}`;
+  const coverImageUrl = APP_ENVIRONMENT === 'development' ? cover : toProxyUrl(cover);
 
   return {
     id: manga.id,
     type: manga.type,
-    title: manga.attributes.title.en,
+    title:
+      Object.keys(manga.attributes.title).length === 1
+        ? Object.values(manga.attributes.title)[0]
+        : undefined,
     altTitles: manga.attributes.altTitles.reduce((acc, title) => {
       title.en && acc.push(title.en);
       return acc;

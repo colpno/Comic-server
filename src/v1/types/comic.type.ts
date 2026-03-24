@@ -19,7 +19,7 @@ interface Tag {
 export type Comic = {
   id: string;
   type: Type;
-  title: string;
+  title?: string;
   altTitles?: string[];
   description?: string;
   isLocked: boolean; // false by default

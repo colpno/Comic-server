@@ -1,15 +1,15 @@
 import axios from 'axios';
 
-import { HOST_URL } from '../../configs/app.conf';
 import { mangadexToChapter, mangadexToComic } from '../services/mangadex.service';
 import { Chapter } from '../types/chapter.type';
 import { Comic } from '../types/comic.type';
 import {
   ChapterImages,
+  Response as MangaDexResponse,
   MangaFeedQuery,
   MangaListQuery,
-  Response as MangaDexResponse,
 } from '../types/mangadex.type';
+import { toProxyUrl } from '../utils/converter.util';
 
 const BASE_URL = 'https://api.mangadex.org' as const;
 const MANGA_URL = `${BASE_URL}/manga` as const;
@@ -35,7 +35,7 @@ export const getTagIdList = async (tagNames: string[]) => {
       .filter((tag) =>
         tagNames
           .map((tagName) => tagName.toLowerCase())
-          .includes(tag.attributes.name.en.toLowerCase())
+          .includes(tag.attributes.name.en.toLowerCase()),
       )
       .map((tag) => tag.id);
 
@@ -76,9 +76,10 @@ export const getMangaList = async (query: MangaListQuery) => {
 
 export const getMangaByTitle = async (
   titleQuery: string,
-  query?: Pick<MangaListQuery, 'includes'>
+  query?: Pick<MangaListQuery, 'includes'>,
 ) => {
   try {
+    const cleanTitle = (title: string) => title.toLowerCase().replace(/[^\w]+/g, '');
     const title = titleQuery.replace(/-/g, ' ');
 
     const response = await axios.get<MangaDexResponse<'collection', 'manga'>>(MANGA_URL, {
@@ -91,9 +92,14 @@ export const getMangaByTitle = async (
     });
 
     // Find the manga with the exact title
-    const manga = response.data.data.find(
-      (manga) => manga.attributes.title.en.toLowerCase() === title.toLowerCase()
-    );
+    const cleanedTitleQuery = cleanTitle(titleQuery);
+
+    const manga = response.data.data.find((manga) => {
+      return (
+        manga.attributes.title &&
+        Object.values(manga.attributes.title).some((t) => cleanTitle(t) === cleanedTitleQuery)
+      );
+    });
 
     if (!manga) return null;
 
@@ -110,15 +116,21 @@ export const getChaptersByMangaId = async (mangaId: string, query?: MangaFeedQue
     const { limit, offset, order, include: includes, exclude: excludes } = query || {};
     const url = getMangaChaptersUrl(mangaId);
 
-    const includeParam = includes?.reduce((acc, include) => {
-      acc[`include${include[0].toUpperCase()}${include.slice(1)}`] = 1;
-      return acc;
-    }, {} as Record<string, 1>);
+    const includeParam = includes?.reduce(
+      (acc, include) => {
+        acc[`include${include[0].toUpperCase()}${include.slice(1)}`] = 1;
+        return acc;
+      },
+      {} as Record<string, 1>,
+    );
 
-    const excludeParam = excludes?.reduce((acc, exclude) => {
-      acc[`exclude${exclude[0].toUpperCase()}${exclude.slice(1)}`] = 0;
-      return acc;
-    }, {} as Record<string, 0>);
+    const excludeParam = excludes?.reduce(
+      (acc, exclude) => {
+        acc[`exclude${exclude[0].toUpperCase()}${exclude.slice(1)}`] = 0;
+        return acc;
+      },
+      {} as Record<string, 0>,
+    );
 
     const params = {
       ...includeParam,
@@ -155,22 +167,19 @@ export const getChaptersByMangaId = async (mangaId: string, query?: MangaFeedQue
 
 export const getChapterContent = async (chapterId: Chapter['id']) => {
   const url = getChapterImagesUrl(chapterId);
-  const proxyUrl = `${HOST_URL}/proxy`;
-
   const response = await axios.get<ChapterImages>(url);
-  const { data } = response;
-
+  const imageLength = response.data.chapter.data.length;
+  const baseUrl = 'https://uploads.mangadex.org';
+  const { hash, data, dataSaver } = response.data.chapter;
   const result: Chapter['content'] = [];
-  const imageLength = data.chapter.data.length;
+
   for (let i = 0; i < imageLength; i++) {
-    const imageFile = data.chapter.data[i];
-    const imageUrl = `${data.baseUrl}/data/${data.chapter.hash}/${imageFile}`;
-    const compressedFile = data.chapter.dataSaver[i];
-    const compressedUrl = `${data.baseUrl}/data-saver/${data.chapter.hash}/${compressedFile}`;
+    const imageUrl = `${baseUrl}/data/${hash}/${data[i]}`;
+    const compressedUrl = `${baseUrl}/data-saver/${hash}/${dataSaver[i]}`;
 
     result.push({
-      data: `${proxyUrl}/${encodeURIComponent(imageUrl)}`,
-      dataSaver: `${proxyUrl}/${encodeURIComponent(compressedUrl)}`,
+      data: toProxyUrl(imageUrl),
+      dataSaver: toProxyUrl(compressedUrl),
     });
   }
 
